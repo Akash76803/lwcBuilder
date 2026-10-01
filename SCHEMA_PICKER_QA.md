@@ -27,3 +27,9 @@ Local validation: nine Node tests and eleven LWC source files compile. Apex test
 ## Current boundaries and next action
 
 Metadata only: canvas rows remain sample data. No SOQL or DML executes. Related source stores a current-record binding; runtime context resolution follows in Phase 2. Filter remains the existing text configuration; visual conditions are the next UI task after picker UAT. Polymorphic typed queries, field reordering, query validation, live forms and bulk saves remain pending. Imported metadata bindings are checked by the runtime in a future phase, not trusted as executable queries.
+
+## Field picker layout fix
+
+The 300px inspector now shows a compact source card with a Change action. Object search is collapsed after selection. Fields / Parent / Child use separate tabs, with scrollable lists, field type badges, selected count, remove buttons, and explicit empty/loading/error states. Advanced filters are collapsed. Search relationships by label or relationship name. Clicking the existing source no longer clears bindings.
+
+Retest at desktop and narrow page widths: long custom labels/API paths must wrap without horizontal overflow; open Change and choose an object; toggle fields; browse Parent then Back; switch to Child; remove a selected field; verify undo/redo and JSON export. Local checks: 9 model tests pass; 11 LWC files compile. Compiled LWC mounted in jsdom with mocked metadata: collapsed object list, tabs, lookup/back, selection deduplication, same-source preservation and removal pass. This does not measure layout or verify Apex. Browser download was blocked by the network allowlist; Dev Org visual verification is pending.

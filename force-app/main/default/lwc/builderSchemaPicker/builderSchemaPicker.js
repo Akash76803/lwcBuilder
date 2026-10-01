@@ -3,10 +3,29 @@ import listObjects from '@salesforce/apex/BuilderSchemaService.listObjects';
 import describeObject from '@salesforce/apex/BuilderSchemaService.describeObject';
 import { selectedFields, toggleField, changeObject, pathFor, relatedSource } from 'c/builderSchemaModel';
 export default class BuilderSchemaPicker extends LightningElement {
- _data={}; schema; objects=[]; steps=[]; search=''; fieldSearch=''; nextOffset; error=''; busy=false; request=0;
+ _data={}; schema; objects=[]; steps=[]; search=''; fieldSearch=''; nextOffset; error=''; busy=false; request=0; objectPickerOpen=false; activeTab='fields'; relationshipSearch='';
  @api get data(){return this._data;} set data(value){const changed=this._data.object!==value?.object;this._data=value||{};if(changed){this.steps=[];if(this.isConnected)this.loadSchema(this._data.object);}}
  connectedCallback(){this.findObjects();if(this._data.object)this.loadSchema(this._data.object);}
  get objectName(){return this._data.object||'Choose an object';}
+ get showObjects(){return this.objectPickerOpen||!this._data.object;}
+ get objectButtonLabel(){return this.showObjects?'Close':'Change';}
+ get objectRows(){return this.objects.map(o=>({...o,cls:o.apiName===this._data.object?'object-row current':'object-row'}));}
+ get noObjects(){return !this.busy&&!this.objects.length;}
+ get fieldCount(){return this.fields.length;}
+ get chosenCount(){return this.chosen.length;}
+ get noFields(){return !this.busy&&!this.fields.length;}
+ get noChosen(){return !this.chosen.length;}
+ get isFields(){return this.activeTab==='fields';}
+ get isParents(){return this.activeTab==='parents';}
+ get isChildren(){return this.activeTab==='children';}
+ get tabs(){return [{id:'fields',label:'Fields'},{id:'parents',label:'Parent'},{id:'children',label:'Child'}].map(t=>({...t,cls:this.activeTab===t.id?'tab active':'tab',selected:this.activeTab===t.id}));}
+ get noLookups(){return !this.busy&&!this.visibleLookups.length;}
+ get noChildren(){return !this.busy&&!this.visibleChildren.length;}
+ get visibleLookups(){return this.lookups.filter(x=>(x.label+' '+x.relationshipName).toLowerCase().includes(this.relationshipSearch.toLowerCase()));}
+ get visibleChildren(){return this.children.filter(x=>(x.label+' '+x.relationshipName).toLowerCase().includes(this.relationshipSearch.toLowerCase()));}
+ toggleObjects(){this.objectPickerOpen=!this.showObjects;}
+ switchTab(e){this.activeTab=e.currentTarget.dataset.tab;this.relationshipSearch='';}
+ relationshipSearchChange(e){this.relationshipSearch=e.target.value;}
  get breadcrumb(){return [this.objectName,...this.steps.map(s=>s.relationshipName)].join(' → ');}
  get hasMore(){return this.nextOffset!==null&&this.nextOffset!==undefined;}
  get canBack(){return this.steps.length>0;}
@@ -24,11 +43,11 @@ export default class BuilderSchemaPicker extends LightningElement {
  async more(){await this.fetchObjects(this.nextOffset);}
  async fetchObjects(offset){this.busy=true;this.error='';try{const result=await listObjects({searchTerm:this.search,offset});this.objects=offset?[...this.objects,...result.objects]:result.objects;this.nextOffset=result.nextOffset;}catch(e){this.error=this.errorText(e);}finally{this.busy=false;}}
  async loadSchema(name){const token=++this.request;this.schema=undefined;this.error='';if(!name)return;this.busy=true;try{const result=await describeObject({objectApiName:name});if(token===this.request)this.schema=result;}catch(e){if(token===this.request)this.error=this.errorText(e);}finally{if(token===this.request)this.busy=false;}}
- chooseObject(e){this.steps=[];this.fieldSearch='';this.emit(changeObject(this._data,e.currentTarget.dataset.name));}
+ chooseObject(e){const name=e.currentTarget.dataset.name;this.objectPickerOpen=false;if(name===this._data.object)return;this.steps=[];this.fieldSearch='';this.activeTab='fields';this.emit(changeObject(this._data,name));}
  selectField(e){this.emit(toggleField(this._data,e.target.dataset.path,e.target.checked));}
  removeField(e){this.emit(toggleField(this._data,e.currentTarget.dataset.path,false));}
- explore(e){const f=this.lookups.find(x=>x.apiName===e.currentTarget.dataset.name);if(!f||f.disabled)return;this.steps=[...this.steps,{relationshipName:f.relationshipName,objectApiName:f.target}];this.fieldSearch='';this.loadSchema(f.target);}
+ explore(e){const f=this.lookups.find(x=>x.apiName===e.currentTarget.dataset.name);if(!f||f.disabled)return;this.steps=[...this.steps,{relationshipName:f.relationshipName,objectApiName:f.target}];this.fieldSearch='';this.activeTab='fields';this.loadSchema(f.target);}
  back(){this.steps=this.steps.slice(0,-1);this.fieldSearch='';this.loadSchema(this.steps.at(-1)?.objectApiName||this._data.object);}
- child(e){const c=this.children.find(x=>x.relationshipName===e.currentTarget.dataset.name);if(!c)return;this.emit({...changeObject(this._data,c.objectApiName),relatedSource:relatedSource(this._data.object,c)});}
+ child(e){const c=this.children.find(x=>x.relationshipName===e.currentTarget.dataset.name);if(!c)return;this.activeTab='fields';this.emit({...changeObject(this._data,c.objectApiName),relatedSource:relatedSource(this._data.object,c)});}
  filterChange(e){this.emit({...this._data,filter:e.target.value});}
 }
