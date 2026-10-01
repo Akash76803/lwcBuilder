@@ -22,6 +22,7 @@ export default class LwcBuilder extends LightningElement {
  add(event){this.addType(event.currentTarget.dataset.type);} addType(type,parentId){this.mutate(()=>{const n=makeNode(type,this.id());const selected=this.selected;const parent=parentId===undefined&&selected&&['section','grid','tabs','modal','form'].includes(selected.type)?selected.id:parentId;insert(this.project.nodes,n,parent);this.selectedId=n.id;});}
  drag(event){event.dataTransfer.setData('text/plain',event.currentTarget.dataset.type);event.dataTransfer.effectAllowed='copy';} allow(event){event.preventDefault();} drop(event){event.preventDefault();this.addType(event.dataTransfer.getData('text/plain'),null);} nodeDrop(event){event.stopPropagation();this.addType(event.detail.type,event.detail.parentId);}
  change(event){const field=event.target.dataset.field,value=event.target.type==='number'?Number(event.target.value):event.target.value;this.mutate(()=>{if(field==='label')this.selected.label=value;else this.selected.props[field]=value;});}
+ schemaChange(event){this.mutate(()=>{this.selected.data=clone(event.detail);});}
  dataChange(event){const field=event.target.dataset.field,value=event.target.value;this.mutate(()=>{this.selected.data[field]=value;});}
  targetChange(event){const target=event.target.value;this.mutate(()=>{this.project.target=target;});}
  projectName(event){const name=event.target.value;this.mutate(()=>{this.project.name=name;});}

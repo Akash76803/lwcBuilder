@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata"><classAccesses><apexClass>BuilderSchemaService</apexClass><enabled>true</enabled></classAccesses><label>LWC Builder Admin</label><description>Schema picker access; does not grant object or field permissions.</description></PermissionSet>
