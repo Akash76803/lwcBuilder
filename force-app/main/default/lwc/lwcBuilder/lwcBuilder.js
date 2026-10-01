@@ -1,0 +1,50 @@
+import { LightningElement } from 'lwc';
+import { clone, palette, sample, flatten, find, makeNode, insert, remove, move, validateProject } from 'c/builderModel';
+export default class LwcBuilder extends LightningElement {
+ project=sample(); selectedId='items'; active='Design'; inspector='Properties'; paletteTab='Components'; search=''; history=[]; future=[]; message='Phase 1 · Configuration and sample data only'; modal=''; prompt=''; logs=[]; aiMessages=[]; draftName=''; previewState={'Order Status':'Draft','Permission Can Edit Orders':'true'};
+ tabs=['Design','Data','Rules','Communication','Actions']; propTabs=['Properties','Bindings','Rules'];
+ get navigation(){return this.tabs.map(label=>({label,cls:this.active===label?'nav active':'nav'}));}
+ get propertyTabs(){return this.propTabs.map(label=>({label,cls:this.inspector===label?'nav active':'nav'}));}
+ get isDesign(){return this.active==='Design';} get isData(){return this.active==='Data'||(this.isDesign&&this.inspector==='Bindings');} get isRules(){return this.active==='Rules'||(this.isDesign&&this.inspector==='Rules');} get isCommunication(){return this.active==='Communication';} get isActions(){return this.active==='Actions';} get isProperties(){return this.isDesign&&this.inspector==='Properties';}
+ get selected(){return find(this.project.nodes,this.selectedId);} get hasSelected(){return !!this.selected;} get selectedLabel(){return this.selected?.label||'Select a component';}
+ get groups(){return ['Layout','Salesforce','Custom'].map(name=>({name,items:palette.filter(x=>x.group===name&&x.label.toLowerCase().includes(this.search.toLowerCase()))}));}
+ get tree(){return flatten(this.project.nodes).map(n=>({...n,cls:n.id===this.selectedId?'tree-row chosen':'tree-row'}));}
+ get parents(){return this.tree.filter(n=>['section','grid','tabs','modal','form'].includes(n.type)&&n.id!==this.selectedId);}
+ get isPalette(){return this.paletteTab==='Components';} get showModal(){return !!this.modal;} get isPreview(){return this.modal==='Preview';} get isNew(){return this.modal==='New project';} get isVersions(){return this.modal==='Versions';} get isDeploy(){return this.modal==='Generate & Deploy';} get isRow(){return this.modal==='Edit row';}
+ get rules(){return this.selected?.rules||[];} get actions(){return this.selected?.actions||[];} get connections(){return this.selected?.connections||[];} get noRules(){return !this.rules.length;} get noActions(){return !this.actions.length;} get noConnections(){return !this.connections.length;}
+ get disableUndo(){return !this.history.length;} get disableRedo(){return !this.future.length;} get previewNodes(){return this.project.nodes;} get versions(){return this.project.versions||[];}
+ get targets(){return [{label:'Record Page',value:'lightning__RecordPage'},{label:'App Page',value:'lightning__AppPage'},{label:'Home Page',value:'lightning__HomePage'},{label:'Quick Action',value:'lightning__RecordAction'}].map(t=>({...t,selected:t.value===this.project.target}));}
+ id(){return `n${Date.now().toString(36)}${Math.random().toString(36).slice(2,7)}`;}
+ record(text){this.logs=[{id:this.id(),text},...this.logs].slice(0,40);this.message=text;}
+ mutate(fn){const before=clone(this.project);try{fn();validateProject(this.project);this.history=[...this.history,before].slice(-40);this.future=[];this.project=clone(this.project);this.record('Design updated · Export JSON to keep a durable copy');}catch(e){this.project=before;this.record(e.message);}}
+ nav(event){this.active=event.currentTarget.dataset.tab;} propTab(event){this.inspector=event.currentTarget.dataset.tab;} paletteMode(event){this.paletteTab=event.currentTarget.dataset.tab;}
+ searchChange(event){this.search=event.target.value;} select(event){this.selectedId=event.detail;} treeSelect(event){this.selectedId=event.currentTarget.dataset.id;}
+ add(event){this.addType(event.currentTarget.dataset.type);} addType(type,parentId){this.mutate(()=>{const n=makeNode(type,this.id());const selected=this.selected;const parent=parentId===undefined&&selected&&['section','grid','tabs','modal','form'].includes(selected.type)?selected.id:parentId;insert(this.project.nodes,n,parent);this.selectedId=n.id;});}
+ drag(event){event.dataTransfer.setData('text/plain',event.currentTarget.dataset.type);event.dataTransfer.effectAllowed='copy';} allow(event){event.preventDefault();} drop(event){event.preventDefault();this.addType(event.dataTransfer.getData('text/plain'),null);} nodeDrop(event){event.stopPropagation();this.addType(event.detail.type,event.detail.parentId);}
+ change(event){const field=event.target.dataset.field,value=event.target.type==='number'?Number(event.target.value):event.target.value;this.mutate(()=>{if(field==='label')this.selected.label=value;else this.selected.props[field]=value;});}
+ dataChange(event){const field=event.target.dataset.field,value=event.target.value;this.mutate(()=>{this.selected.data[field]=value;});}
+ targetChange(event){const target=event.target.value;this.mutate(()=>{this.project.target=target;});}
+ projectName(event){const name=event.target.value;this.mutate(()=>{this.project.name=name;});}
+ deleteNode(){this.mutate(()=>{remove(this.project.nodes,this.selectedId);this.selectedId=this.project.nodes[0]?.id;});}
+ duplicate(){this.mutate(()=>{const n=clone(this.selected);const rekey=node=>{node.id=this.id();node.children.forEach(rekey);};rekey(n);n.label+=' Copy';this.project.nodes.push(n);this.selectedId=n.id;});}
+ moveTo(event){const parent=event.target.value;this.mutate(()=>move(this.project.nodes,this.selectedId,parent||null));}
+ reorder(event){const direction=Number(event.currentTarget.dataset.direction);this.mutate(()=>{const reorder=nodes=>{const i=nodes.findIndex(n=>n.id===this.selectedId);if(i>=0){const next=i+direction;if(next>=0&&next<nodes.length)[nodes[i],nodes[next]]=[nodes[next],nodes[i]];return true;}return nodes.some(n=>reorder(n.children));};reorder(this.project.nodes);});}
+ undo(){if(!this.history.length)return;this.future=[...this.future,clone(this.project)];this.project=this.history[this.history.length-1];this.history=this.history.slice(0,-1);this.ensureSelection();}
+ redo(){if(!this.future.length)return;this.history=[...this.history,clone(this.project)];this.project=this.future[this.future.length-1];this.future=this.future.slice(0,-1);this.ensureSelection();}
+ ensureSelection(){if(!this.selected)this.selectedId=this.project.nodes[0]?.id;}
+ addRule(){this.mutate(()=>this.selected.rules.push({id:this.id(),field:'Order Status',operator:'equals',value:'Draft',effect:'Visible',join:'AND'}));}
+ addAction(){this.mutate(()=>this.selected.actions.push({id:this.id(),type:'Validate',name:'Validate',error:'Stop'}));}
+ addConnection(){this.mutate(()=>this.selected.connections.push({id:this.id(),event:'rowselect',target:'child.recordId',kind:'Parent to child',payload:'detail.recordId'}));}
+ rowChange(event){const {collection,id,field}=event.target.dataset,value=event.target.value;this.mutate(()=>{this.selected[collection].find(r=>r.id===id)[field]=value;});}
+ removeRow(event){const {collection,id}=event.currentTarget.dataset;this.mutate(()=>{this.selected[collection]=this.selected[collection].filter(r=>r.id!==id);});}
+ actionMove(event){const {id,direction}=event.currentTarget.dataset;this.mutate(()=>{const a=this.selected.actions,i=a.findIndex(x=>x.id===id),j=i+Number(direction);if(j>=0&&j<a.length)[a[i],a[j]]=[a[j],a[i]];});}
+ open(event){this.modal=event.currentTarget.dataset.modal;this.draftName='';} close(){this.modal='';}
+ newName(event){this.draftName=event.target.value;} create(){this.mutate(()=>{this.project={schemaVersion:1,name:this.draftName||'Untitled Project',target:'lightning__RecordPage',nodes:[],versions:[]};this.selectedId=null;});this.close();}
+ save(){this.mutate(()=>{const snapshot=clone(this.project);snapshot.versions=[];this.project.versions=[...(this.project.versions||[]),{id:this.id(),name:`Revision ${(this.project.versions||[]).length+1}`,date:new Date().toISOString(),snapshot}].slice(-10);});this.download();this.record('Revision saved as JSON download · Server persistence connects later');}
+ restore(event){const v=this.versions.find(x=>x.id===event.currentTarget.dataset.id);if(v)this.mutate(()=>{const versions=this.project.versions;this.project=clone(v.snapshot);this.project.versions=versions;this.ensureSelection();});this.close();}
+ download(){const text=JSON.stringify(this.project,null,2);const anchor=document.createElement('a');anchor.href=URL.createObjectURL(new Blob([text],{type:'application/octet-stream'}));anchor.download='lwc-builder-project.json';anchor.click();URL.revokeObjectURL(anchor.href);}
+ importProject(event){const file=event.target.files?.[0];if(!file)return;if(file.size>2*1024*1024){this.record('Project file exceeds 2 MB');return;}const reader=new FileReader();reader.onload=()=>{try{const p=validateProject(JSON.parse(reader.result));this.mutate(()=>{this.project=p;this.selectedId=p.nodes[0]?.id;});}catch(e){this.record(`Import rejected: ${e.message}`);}};reader.onerror=()=>this.record('Unable to read file');reader.readAsText(file);}
+ promptChange(event){this.prompt=event.target.value;} ai(){if(!this.prompt.trim())return;this.aiMessages=[...this.aiMessages,{id:this.id(),text:this.prompt},{id:this.id(),text:'Demo assistant: prompt received. AI service is not connected. Configure the design using the editors; no automatic changes were applied.'}];this.prompt='';this.record('AI demo response · no API request made');}
+ previewChange(event){this.previewState={...this.previewState,[event.detail.key]:event.detail.value};} statusChange(event){this.previewState={...this.previewState,'Order Status':event.target.value};}
+ demoAction(event){this.modal='Edit row';this.record(`${event.detail}: sample action only; no Salesforce write`);} rowSave(){this.close();this.record('Sample popup closed · no record changes saved');}
+}
