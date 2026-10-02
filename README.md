@@ -21,7 +21,7 @@ Save JSON creates a downloadable file. There is no localStorage dependency or Sa
 
 ## Explicit demo boundaries
 
-No org schema query, business record reads/writes, Flow/Apex execution, AI request, code ZIP generation or authenticated deployment takes place. Generate & Deploy opens an explanatory modal. The AI panel returns a demo message and never claims changes were applied. Table rows are sample display data; the popup is a demonstration and does not update them. Child LWC is a placeholder until an adapter is registered.
+Object/field metadata uses BuilderSchemaService when deployed. No business record reads/writes, Flow/Apex execution, AI request, code ZIP generation or authenticated deployment takes place. Generate & Deploy opens an explanatory modal. The AI panel returns a demo message and never claims changes were applied. Table rows are sample display data; the popup is a demonstration and does not update them. Child LWC is a placeholder until an adapter is registered.
 
 Data/relationship and communication fields currently accept typed configuration. They are not yet validated org-backed dropdowns. Rules support flat AND/OR Visible expressions in listed order; nested groups, editability/required execution and custom expression functions are follow-up work. Actions preserve type/name/error configuration; branching input/output mapping and full action diagrams are not yet implemented. Tabs and modal canvas blocks show structural containers, not fully configured runtime navigation. Variant, width and accent fields are preserved; padding, labels and values are rendered. Full design-system coverage remains pending.
 
@@ -41,3 +41,7 @@ Data/relationship and communication fields currently accept typed configuration.
 8. Verify AI and deployment buttons clearly report demo/pending status.
 
 No org credentials are included. APIs use version 66.0 as a conservative initial baseline; confirm it against your org before deployment.
+
+## Data Pack Designer (testing)
+
+Open **Data Packs** to define inputs, multiple object sources, a nested output tree and mappings. Run a sample preview and publish a local sample version. In **Data / Bindings**, bind a component to a version and compatible output node. Pack definitions and versions travel with Save JSON / Open. See [DATA_PACK_QA.md](DATA_PACK_QA.md) for deployment, acceptance and runtime boundaries.

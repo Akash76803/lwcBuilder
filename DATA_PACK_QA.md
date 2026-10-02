@@ -1,0 +1,51 @@
+# Data Pack Designer — Phase 1 working UI
+
+This workspace extends the existing builder. It does not replace legacy object/field bindings. Pack definitions, draft sources, output mappings, published sample versions and component bindings are stored in the project JSON. Save JSON from the toolbar and reopen it later. There is no Salesforce server persistence yet.
+
+## Implemented
+
+- Data Packs navigation; blank pack and CustomerWorkspace sample template; multiple packs.
+- Text/Number/Boolean inputs with required/default values and preview overrides.
+- Sources with existing live org metadata picker, selected fields, visual AND filters (input/constant), sort, row limits and sample records.
+- Nested Object/List/Value output tree; rename/add/remove nodes; limits of 10 levels and 200 output nodes.
+- Field/input/constant/source-count value mappings. Lists match parent record keys to source keys. Grouping objects inherit their enclosing source record.
+- Validation, sample output JSON, execution row counts and local published sample snapshots (up to 10).
+- Component bindings pinned to a published sample version. Tables bind lists and render generic output columns; forms show an object JSON preview; value controls show scalar values. Inputs are sample constants.
+- Builder undo/redo and JSON Save/Open include all definitions. Old projects without dataPacks still work.
+
+## Deploy
+
+Use the existing Dev Org alias:
+
+```sh
+git checkout testing
+git pull origin testing
+sf project deploy start --source-dir force-app/main/default/lwc --target-org YOUR_ORG_ALIAS
+```
+
+If the earlier schema service is not deployed, deploy all force-app with BuilderSchemaServiceTest and assign LWC_Builder_Admin as described in SCHEMA_PICKER_QA.md.
+
+## Acceptance walkthrough
+
+1. Open Data Packs → Load Sample Template. The new CustomerWorkspace pack has one input, two sources and nested customer/contacts output.
+2. Run Sample Preview: customer Acme includes only Alex, not Sam. Input recordId=a2 returns Other Customer with Sam. Nonexistent ID returns customer:null.
+3. Select contacts in the tree: source Contacts; parent key Id; matching field AccountId. Edit a mapping or remove a referenced source; Validate must identify the problem.
+4. Select a source: check live metadata picker; inspect sample records, visual filters and sort. Source filters are AND only. The sample interpreter never queries Salesforce records.
+5. Create a blank pack. Add input/source, an Object or List and Value children. Select output type and value mapping. Incomplete draft can be retained with Save JSON; publishing must fail until validated and sample preview succeeds.
+6. Publish Sample Version. Go to Data (the selected component is initially Order Items). Choose CustomerWorkspace → Version 1 → customer.contacts. The canvas table renders id/name/email for Alex.
+7. Change sample input to a2 in the binding panel: the bound table shows Sam. Missing required inputs show a binding error.
+8. Change the pack draft/source sample data. Existing binding stays pinned to v1. Publish v2, then explicitly change the binding version to adopt the new output.
+9. Save JSON, reload the page and Open the file. Check pack definitions, snapshots and bindings. Undo/redo a pack edit from the Design toolbar. Open an older project with no packs and confirm its legacy canvas still renders.
+10. Check desktop and narrow page widths, long node names, validation errors and scrollable source/preview panels in Salesforce. Retest schema picker layout and permissions.
+
+## Validation evidence
+
+20 Node tests pass; 15 LWC files compile; metadata XML parses; diff check clean. Compiled full app mounted with mocked Apex metadata: create example, preview, publish, component binding/table rendering, navigation persistence and input editing pass. These checks do not verify Salesforce deployment, CRUD/FLS or real org records. Local Chromium rendering could not run in this environment; desktop/narrow visual QA remains pending in the Dev Org.
+
+## Boundaries / next work
+
+This is a sample-executable UI foundation. Live queries, source dependency scheduling, current-user/current-record/event input bindings, registered Apex providers, reusable pack-as-source, pagination beyond sample limits, OR/nested filters, arbitrary formulas/aggregations, duplicate policies, writable forms and automatic legacy migration remain pending. Legacy settings are preserved under a collapsible inspector section.
+
+Source counts count filtered/limited source rows, not mapped output lists. Single-record Objects reject multiple source records rather than silently picking one; no records yield null. List no-match yields []. Sample lookup fields require nested sample JSON records. Related child context metadata is not silently executed: validation requires expressing it as an explicit filter/join and clearing the unsupported context marker.
+
+Next: Dev Org UAT of the designer/output bindings, then structured provider execution and input-context bindings. Merge testing to main only after relevant org testing.
