@@ -17,14 +17,15 @@ export default class BuilderSelection extends LightningElement {
  get extraLabel(){return 'View all '+this.selected.length+' selected items';}
  get searchLabel(){return 'Search '+this.label;}
  get selectionClass(){return this.opened?'selection opened':'selection';}
- connectedCallback(){this.outsideClick=event=>{const path=event.composedPath();if(!path.includes(this.template.host)&&!path.includes(this.template.querySelector('.selection')))this.opened=false;};document.addEventListener('pointerdown',this.outsideClick);}
+ insideEvent=null;
+ connectedCallback(){this.outsideClick=event=>{if(this.insideEvent!==event)this.opened=false;this.insideEvent=null;};document.addEventListener('pointerdown',this.outsideClick);}
+ insidePointer(event){this.insideEvent=event;}
  disconnectedCallback(){document.removeEventListener('pointerdown',this.outsideClick);}
  open(){if(!this.disabled)this.opened=true;}
  toggle(){if(!this.disabled)this.opened=!this.opened;}
  showSelected(){if(!this.disabled){this.search='';this.opened=true;}}
  done(){this.opened=false;this.template.querySelector('.toggle')?.focus();}
  keydown(event){if(event.key==='Escape'){event.stopPropagation();this.done();}else if(event.key==='ArrowDown'&&!this.opened){event.preventDefault();this.open();}}
- focusOut(event){if(event.relatedTarget&&!this.template.contains(event.relatedTarget))this.opened=false;}
  get count(){return this.selected.length;} get icon(){return this.picklist?'utility:list':'standard:account';}
  get disableSelectAll(){return this.disabled||!!this.sourceError||!this.results.some(r=>!r.checked);} get disableClear(){return this.disabled||!this.selected.length;}
  searchChange(event){this.search=event.target.value;this.open();}

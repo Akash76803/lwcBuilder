@@ -51,8 +51,12 @@ Local evidence: 41 model tests, 27 compiled source files, compiled-app selection
 
 ## Compact selection layout
 
-Lookup, Multi-select Lookup and Multi-select Picklist now share a single-line closed control: first selected pill, +N overflow count, search and dropdown arrow. Results, full selected pills, picklist tools and selected count render only while the dropdown is open. All selections can be removed from the open panel; closed first-pill removal remains available. Single lookup closes after selection. Done/Escape return focus to the arrow, outside pointer click and keyboard focus leaving the component close the dropdown. Search focus/input or ArrowDown opens it. Disabled/read mode blocks opening and editing. Listeners are removed on component disconnect.
+Lookup, Multi-select Lookup and Multi-select Picklist now share a single-line closed control: first selected pill, +N overflow count, search and dropdown arrow. Results, full selected pills, picklist tools and selected count render only while the dropdown is open. All selections can be removed from the open panel; closed first-pill removal remains available. Single lookup closes after selection. Done/Escape return focus to the arrow, outside pointer click closes the dropdown. Tab/focus changes within the selector do not dismiss it; use Done, Escape or an outside pointer click. Search focus/input or ArrowDown opens it. Disabled/read mode blocks opening and editing. Listeners are removed on component disconnect.
 
 No project migration or data-provider changes. Configured defaults persist; interactive choices remain sample session state. Object API name is still saved context only; searchable object selection/source enforcement is pending separate work.
 
 Local checks: 27 files compile, compact compiled-app interaction smoke PASS (all three types, collapsed initial state, count, remove, search, Done, Escape, outside click and clear). Model suite remains 41 tests. Dev Org UAT must check narrow columns, long selected labels, click/Tab inside dropdown, overlapping neighboring inputs, bottom-of-canvas/Preview scrolling and clipping; visual layout was not verified in a real Salesforce browser.
+
+### Selection click regression fix
+
+Removed focus-out dismissal and changed outside-pointer detection to mark events received inside the selector. This prevents a retargeted focus transition from removing choices before their click/change handler runs. Local compiled-DOM regression simulates focusout to the component host between pointerdown and click for lookup and picklist; selection remains available. All three selector interactions pass locally. Salesforce Dev Org verification is still required; the reported org failure has not been reproduced locally.
