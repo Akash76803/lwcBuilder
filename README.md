@@ -45,3 +45,7 @@ No org credentials are included. APIs use version 66.0 as a conservative initial
 ## Data Pack Designer (testing)
 
 Open **Data Packs** to define inputs, multiple object sources, a nested output tree and mappings. Run a sample preview and publish a local sample version. In **Data / Bindings**, bind a component to a version and compatible output node. Pack definitions and versions travel with Save JSON / Open. See [DATA_PACK_QA.md](DATA_PACK_QA.md) for deployment, acceptance and runtime boundaries.
+
+## Screen Builder foundation
+
+Categorized registry and component-specific properties extend the existing canvas. See [SCREEN_BUILDER_QA.md](SCREEN_BUILDER_QA.md) for nesting rules, deployment checks, preview limits and next work. All changes remain on testing until Dev Org UAT.
