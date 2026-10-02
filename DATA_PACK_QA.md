@@ -5,7 +5,7 @@ This workspace extends the existing builder. It does not replace legacy object/f
 ## Implemented
 
 - Data Packs navigation; blank pack and CustomerWorkspace sample template; multiple packs.
-- Text/Number/Boolean inputs with required/default values and preview overrides.
+- Text/Number/Decimal/Boolean/Date/DateTime/RecordId/Email/Phone/URL/Object/List inputs with required/default values and preview overrides.
 - Sources with existing live org metadata picker, selected fields, visual AND filters (input/constant), sort, row limits and sample records.
 - Nested Object/List/Value output tree; rename/add/remove nodes; limits of 10 levels and 200 output nodes.
 - Field/input/constant/source-count value mappings. Lists match parent record keys to source keys. Grouping objects inherit their enclosing source record.
@@ -40,7 +40,7 @@ If the earlier schema service is not deployed, deploy all force-app with Builder
 
 ## Validation evidence
 
-20 Node tests pass; 15 LWC files compile; metadata XML parses; diff check clean. Compiled full app mounted with mocked Apex metadata: create example, preview, publish, component binding/table rendering, navigation persistence and input editing pass. These checks do not verify Salesforce deployment, CRUD/FLS or real org records. Local Chromium rendering could not run in this environment; desktop/narrow visual QA remains pending in the Dev Org.
+25 Node tests pass; 18 LWC files compile; metadata XML parses; diff check clean. Compiled full app mounted with mocked Apex metadata: create example, preview, publish, component binding/table rendering, navigation persistence and input editing pass. These checks do not verify Salesforce deployment, CRUD/FLS or real org records. Local Chromium rendering could not run in this environment; desktop/narrow visual QA remains pending in the Dev Org.
 
 ## Boundaries / next work
 
@@ -49,3 +49,9 @@ This is a sample-executable UI foundation. Live queries, source dependency sched
 Source counts count filtered/limited source rows, not mapped output lists. Single-record Objects reject multiple source records rather than silently picking one; no records yield null. List no-match yields []. Sample lookup fields require nested sample JSON records. Related child context metadata is not silently executed: validation requires expressing it as an explicit filter/join and clearing the unsupported context marker.
 
 Next: Dev Org UAT of the designer/output bindings, then structured provider execution and input-context bindings. Merge testing to main only after relevant org testing.
+
+## Expanded input types
+
+Input defaults, preview overrides, constants and component binding inputs share typed controls. Boolean uses a True/False/Not set selector; Date uses a date picker; numeric inputs accept decimals; Object/List use JSON editors; DateTime uses explicit ISO text with timezone. DateTime normalizes to UTC. RecordId checks 15/18-character syntax only, not record existence or checksum. Phone preserves text formatting. URL allows HTTP/HTTPS. Decimal currently uses JavaScript Number precision. Picklist options, currency precision, typed list item schemas and a visual nested Object/List input editor remain pending.
+
+UAT: edit an input and verify all 12 choices; test valid leap date vs invalid date; timezone datetime; false Boolean; nested Object and List; reject malformed JSON or wrong shape; Save/Open and check pinned bindings. Compiled mocked-app tests verify type choices, date control and JSON editing.

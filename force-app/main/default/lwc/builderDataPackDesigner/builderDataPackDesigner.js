@@ -1,5 +1,5 @@
 import { LightningElement, api } from 'lwc';
-import { newPack, examplePack, newOutput, outputRows, findOutput, removeOutput, validatePack, runSample, publishSampleVersion } from 'c/builderDataPackModel';
+import { newPack, examplePack, newOutput, outputRows, findOutput, removeOutput, validatePack, runSample, publishSampleVersion, valueTypes } from 'c/builderDataPackModel';
 const clone=v=>JSON.parse(JSON.stringify(v));
 export default class BuilderDataPackDesigner extends LightningElement {
  _packs=[];packId='';selection='output';selectionId='';message='';issues=[];preview='';execution=[];testValues={};previewTab='Output';
@@ -15,7 +15,7 @@ export default class BuilderDataPackDesigner extends LightningElement {
  get isValue(){return this.isOutput&&this.selected?.kind==='Value';}get isContainer(){return this.isOutput&&!this.isValue;}get isList(){return this.selected?.kind==='List';}
  get canDeleteOutput(){return this.isOutput&&this.selected?.id!==this.pack?.output.id;}
  get fieldMode(){return this.selected?.mode==='field';}get inputMode(){return this.selected?.mode==='input';}get constantMode(){return this.selected?.mode==='constant';}get countMode(){return this.selected?.mode==='count';}
- get types(){return ['Text','Number','Boolean'].map(value=>({value,selected:value===this.selected?.type}));}
+ get types(){return valueTypes.map(value=>({value,selected:value===this.selected?.type}));}
  get modes(){return [{value:'field',label:'Source field'},{value:'input',label:'Input value'},{value:'constant',label:'Constant'},{value:'count',label:'Source record count'}].map(v=>({...v,selected:v.value===this.selected?.mode}));}
  get sourceOptions(){return this.sources.map(s=>({value:s.id,label:s.name,selected:s.id===this.selected?.sourceId}));}
  get inputOptions(){return this.inputs.map(i=>({value:i.id,label:i.name,selected:i.id===this.selected?.inputId}));}
@@ -44,13 +44,14 @@ export default class BuilderDataPackDesigner extends LightningElement {
  addSource(){const id=this.id();this.selection='source';this.selectionId=id;this.mutate(p=>p.sources.push({id,name:'Source'+(p.sources.length+1),object:'',fields:'',selectedFields:[],filter:'',filters:[],sortField:'',sortDirection:'ASC',limit:100,sampleJson:'[]'}));}
  ancestors(id){const visit=(n,chain)=>{if(n.id===id)return chain;for(const c of n.children){const found=visit(c,[...chain,n]);if(found)return found;}return null;};return visit(this.pack.output,[])||[];}
  addOutput(e){const kind=e.currentTarget.dataset.kind,id=this.id();const current=this.isOutput?this.selected:this.pack.output;const parent=current.kind==='Value'?this.ancestors(current.id).at(-1):current;this.mutate(p=>{const target=findOutput(p.output,parent.id);const node=newOutput(id,kind);node.name=(kind==='Object'?'object':kind==='List'?'items':'value')+(target.children.length+1);target.children.push(node);});this.selection='output';this.selectionId=id;}
+ typedChange(e){const field=e.currentTarget.dataset.field,value=e.detail.value;const id=this.selectionId,kind=this.selection;this.mutate(p=>{const row=kind==='input'?p.inputs.find(i=>i.id===id):findOutput(p.output,id);row[field]=value;});}
  selectedChange(e){const field=e.target.dataset.field,value=e.target.type==='checkbox'?e.target.checked:e.target.value;const kind=this.selection,id=this.selectionId;this.mutate(p=>{const row=kind==='input'?p.inputs.find(i=>i.id===id):kind==='source'?p.sources.find(s=>s.id===id):findOutput(p.output,id);row[field]=field==='limit'?Number(value):value;if(kind==='output'&&row.kind==='Value'&&field==='mode'&&value!=='count')row.sourceId='';});}
  schemaChange(e){const id=this.selectionId;this.mutate(p=>{const i=p.sources.findIndex(s=>s.id===id);p.sources[i]={...p.sources[i],...clone(e.detail)};});}
  removeSelected(){const kind=this.selection,id=this.selectionId;this.mutate(p=>{if(kind==='input')p.inputs=p.inputs.filter(i=>i.id!==id);else if(kind==='source')p.sources=p.sources.filter(s=>s.id!==id);else removeOutput(p.output,id);});this.selection='output';this.selectionId=this.pack.output.id;}
  addFilter(){const id=this.selectionId;this.mutate(p=>p.sources.find(s=>s.id===id).filters.push({id:this.id(),field:'',operator:'equals',valueKind:'constant',value:''}));}
  filterChange(e){const id=this.selectionId,fid=e.target.dataset.id,field=e.target.dataset.field,value=e.target.value;this.mutate(p=>{const f=p.sources.find(s=>s.id===id).filters.find(x=>x.id===fid);f[field]=value;if(field==='valueKind')f.value='';});}
  removeFilter(e){const id=this.selectionId,fid=e.currentTarget.dataset.id;this.mutate(p=>{const source=p.sources.find(s=>s.id===id);source.filters=source.filters.filter(f=>f.id!==fid);});}
- testChange(e){this.testValues={...this.testValues,[e.target.dataset.id]:e.target.value};this.clearResult();}
+ testChange(e){this.testValues={...this.testValues,[e.currentTarget.dataset.id]:e.detail.value};this.clearResult();}
  previewSwitch(e){this.previewTab=e.currentTarget.dataset.tab;}
  validate(){try{this.issues=validatePack(this.pack);this.message=this.issues.length?'Fix validation issues before running preview.':'Configuration validated.';this.previewTab='Validation';}catch(e){this.message=e.message;}}
  run(){try{const result=runSample(this.pack,this.testValues);this.preview=JSON.stringify(result.output,null,2);this.execution=result.execution;this.issues=[];this.message='Sample preview passed · No org records queried';this.previewTab='Output';}catch(e){this.preview='';this.execution=[];this.message=e.message;this.issues=[{path:'Preview',message:e.message}];this.previewTab='Validation';}}
