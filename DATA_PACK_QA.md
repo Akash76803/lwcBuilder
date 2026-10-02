@@ -40,7 +40,7 @@ If the earlier schema service is not deployed, deploy all force-app with Builder
 
 ## Validation evidence
 
-25 Node tests pass; 18 LWC files compile; metadata XML parses; diff check clean. Compiled full app mounted with mocked Apex metadata: create example, preview, publish, component binding/table rendering, navigation persistence and input editing pass. These checks do not verify Salesforce deployment, CRUD/FLS or real org records. Local Chromium rendering could not run in this environment; desktop/narrow visual QA remains pending in the Dev Org.
+25 Node tests pass; 21 LWC files compile; metadata XML parses; diff check clean. Compiled full app mounted with mocked Apex metadata: create example, preview, publish, component binding/table rendering, navigation persistence and input editing pass. These checks do not verify Salesforce deployment, CRUD/FLS or real org records. Local Chromium rendering could not run in this environment; desktop/narrow visual QA remains pending in the Dev Org.
 
 ## Boundaries / next work
 
@@ -55,3 +55,9 @@ Next: Dev Org UAT of the designer/output bindings, then structured provider exec
 Input defaults, preview overrides, constants and component binding inputs share typed controls. Boolean uses a True/False/Not set selector; Date uses a date picker; numeric inputs accept decimals; Object/List use JSON editors; DateTime uses explicit ISO text with timezone. DateTime normalizes to UTC. RecordId checks 15/18-character syntax only, not record existence or checksum. Phone preserves text formatting. URL allows HTTP/HTTPS. Decimal currently uses JavaScript Number precision. Picklist options, currency precision, typed list item schemas and a visual nested Object/List input editor remain pending.
 
 UAT: edit an input and verify all 12 choices; test valid leap date vs invalid date; timezone datetime; false Boolean; nested Object and List; reject malformed JSON or wrong shape; Save/Open and check pinned bindings. Compiled mocked-app tests verify type choices, date control and JSON editing.
+
+## Searchable field API selectors
+
+Filter fields, sort fields, parent record keys, matching source keys and output Value field mappings now use searchable dropdowns. Root field labels/API names come from the readable org schema. Lookup paths selected in the source relationship explorer are also available. Output field mapping is restricted to selected source fields. Existing saved paths remain visible and are never silently cleared; unknown paths are marked for verification. Advanced manual entry is collapsed and checks path syntax.
+
+Local compiled-app checks pass for metadata field labels, search, filter changes, preserving the selected field during search, restricted output choices and invalid manual path rejection. UAT: test standard/custom fields, source changes, permission failures, selected multi-hop paths and existing saved projects. No live query/path validation is claimed.

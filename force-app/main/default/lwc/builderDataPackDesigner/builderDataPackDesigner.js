@@ -26,7 +26,13 @@ export default class BuilderDataPackDesigner extends LightningElement {
  get versions(){return this.pack?.versions.map(v=>({version:v.version,date:v.date}))||[];}
  get filters(){return (this.selected?.filters||[]).map(f=>({...f,ops:['equals','not equals','contains','greater than','blank'].map(value=>({value,selected:value===f.operator})),kinds:['constant','input'].map(value=>({value,selected:value===f.valueKind})),isInput:f.valueKind==='input',inputOptions:this.inputs.map(i=>({value:i.id,label:i.name,selected:i.id===f.value}))}));}
  get sortOptions(){return ['ASC','DESC'].map(value=>({value,selected:value===this.selected?.sortDirection}));}
- get fieldOptions(){const current=this.selected;let sourceId=current?.sourceId;if(this.isValue&&this.fieldMode){const ancestry=this.ancestors(current.id);sourceId=[...ancestry].reverse().find(n=>n.sourceId)?.sourceId;}const source=this.sources.find(s=>s.id===sourceId);const fields=source?.selectedFields||String(source?.fields||'').split(',').map(x=>x.trim()).filter(Boolean);return fields.map(value=>({value,selected:value===current?.field}));}
+ get fieldSource(){const current=this.selected;if(!current)return {};let id=current.sourceId;if(this.isValue&&this.fieldMode)id=[...this.ancestors(current.id)].reverse().find(n=>n.sourceId)?.sourceId;return this.sources.find(s=>s.id===id)||{};}
+ get parentSource(){const id=[...this.ancestors(this.selected?.id)].reverse().find(n=>n.sourceId)?.sourceId;return this.sources.find(s=>s.id===id)||{};}
+ get sourcePaths(){return this.paths(this.isSource?this.selected:this.fieldSource);}
+ get parentPaths(){return this.paths(this.parentSource);}
+ paths(source){return source?.selectedFields||String(source?.fields||'').split(',').map(x=>x.trim()).filter(Boolean);}
+ fieldSelection(e){const field=e.currentTarget.dataset.field,value=e.detail.value,id=this.selectionId,kind=this.selection;this.mutate(p=>{const row=kind==='source'?p.sources.find(s=>s.id===id):findOutput(p.output,id);row[field]=value;});}
+ filterFieldSelection(e){const id=this.selectionId,fid=e.currentTarget.dataset.id,value=e.detail.value;this.mutate(p=>p.sources.find(s=>s.id===id).filters.find(f=>f.id===fid).field=value);}
  get sampleInputs(){return this.inputs.map(i=>({...i,value:Object.prototype.hasOwnProperty.call(this.testValues,i.id)?this.testValues[i.id]:i.defaultValue??''}));}
  get tabs(){return ['Output','Validation','Execution'].map(label=>({label,cls:this.previewTab===label?'preview-tab active':'preview-tab'}));}
  get showOutput(){return this.previewTab==='Output';}get showValidation(){return this.previewTab==='Validation';}get showExecution(){return this.previewTab==='Execution';}get noIssues(){return !this.issues.length;}
