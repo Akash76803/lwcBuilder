@@ -31,7 +31,7 @@ export default class BuilderDataPackDesigner extends LightningElement {
  get sourcePaths(){return this.paths(this.isSource?this.selected:this.fieldSource);}
  get parentPaths(){return this.paths(this.parentSource);}
  paths(source){return source?.selectedFields||String(source?.fields||'').split(',').map(x=>x.trim()).filter(Boolean);}
- fieldSelection(e){const field=e.currentTarget.dataset.field,value=e.detail.value,id=this.selectionId,kind=this.selection;this.mutate(p=>{const row=kind==='source'?p.sources.find(s=>s.id===id):findOutput(p.output,id);row[field]=value;});}
+ fieldSelection(e){const field=e.currentTarget.dataset.field,value=e.detail.value,id=this.selectionId,kind=this.selection,sourceId=this.fieldSource.id,fromTraversal=e.detail.fromTraversal;this.mutate(p=>{const row=kind==='source'?p.sources.find(s=>s.id===id):findOutput(p.output,id);row[field]=value;if(kind==='output'&&field==='field'&&fromTraversal&&sourceId){const source=p.sources.find(s=>s.id===sourceId);const paths=this.paths(source);source.selectedFields=[...new Set([...paths,value])];source.fields=source.selectedFields.join(', ');}});}
  filterFieldSelection(e){const id=this.selectionId,fid=e.currentTarget.dataset.id,value=e.detail.value;this.mutate(p=>p.sources.find(s=>s.id===id).filters.find(f=>f.id===fid).field=value);}
  get sampleInputs(){return this.inputs.map(i=>({...i,value:Object.prototype.hasOwnProperty.call(this.testValues,i.id)?this.testValues[i.id]:i.defaultValue??''}));}
  get tabs(){return ['Output','Validation','Execution'].map(label=>({label,cls:this.previewTab===label?'preview-tab active':'preview-tab'}));}

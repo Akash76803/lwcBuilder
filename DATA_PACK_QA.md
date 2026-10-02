@@ -61,3 +61,13 @@ UAT: edit an input and verify all 12 choices; test valid leap date vs invalid da
 Filter fields, sort fields, parent record keys, matching source keys and output Value field mappings now use searchable dropdowns. Root field labels/API names come from the readable org schema. Lookup paths selected in the source relationship explorer are also available. Output field mapping is restricted to selected source fields. Existing saved paths remain visible and are never silently cleared; unknown paths are marked for verification. Advanced manual entry is collapsed and checks path syntax.
 
 Local compiled-app checks pass for metadata field labels, search, filter changes, preserving the selected field during search, restricted output choices and invalid manual path rejection. UAT: test standard/custom fields, source changes, permission failures, selected multi-hop paths and existing saved projects. No live query/path validation is claimed.
+
+## Direct parent lookup browser
+
+Each field selector now has **Browse fields & parent lookups**. It opens a responsive dialog with the root object, lookup path, per-level field search, parent lookup navigation, Back and clickable breadcrumbs. Select a field to preview its API path and type, then click Use Field. Cancel or Escape leaves the mapping unchanged. Parent traversal uses readable schema metadata only, with up to five hops; polymorphic targets remain disabled and are explained. Metadata failures show Retry and prevent applying a stale selection.
+
+For output Value mappings, choosing a field through the browser also adds that path to the enclosing source's selected fields without duplicates. Filters/sort/join keys apply their chosen path without changing output columns. Root changes invalidate pending navigation.
+
+UAT: on a Contact source browse Account → Owner → Name; selected path must be Account.Owner.Name. Use Field must update both output mapping and source selected fields. Test custom lookups, Back/breadcrumb, Cancel/Escape, search, five-hop cap, polymorphic fields and permission failures. Save/Open must preserve the new path. Sample lookup data must contain nested objects, e.g. {"Account":{"Owner":{"Name":"Alex"}}}, for sample execution. This is metadata traversal, not a live record query.
+
+Compiled mocked-app checks pass for two-hop path construction, preview-before-commit, source selection update, Back/breadcrumb, Escape/cancel, maximum depth, polymorphic block and metadata errors. Existing compiled-app creation/preview/publish/table-binding regression also passes. Dev Org visual/permission QA remains pending.
