@@ -1,6 +1,6 @@
 import { LightningElement } from 'lwc';
 import { clone, palette, sample, flatten, find, makeNode, insert, remove, move, parentOf, validateProject } from 'c/builderModel';
-import { componentDefinition, canContain } from 'c/builderModel';
+import { componentDefinition, canContain, validateInputConfig, validateInputValue } from 'c/builderModel';
 import { validatePackCollection, bindablePaths, resolveBinding } from 'c/builderDataPackModel';
 export default class LwcBuilder extends LightningElement {
  project=sample(); selectedId='items'; active='Design'; inspector='Properties'; paletteTab='Components'; search=''; history=[]; future=[]; message='Phase 1 · Configuration and sample data only'; modal=''; prompt=''; logs=[]; aiMessages=[]; draftName=''; previewState={'Order Status':'Draft','Permission Can Edit Orders':'true'};
@@ -40,7 +40,7 @@ export default class LwcBuilder extends LightningElement {
  drag(event){event.dataTransfer.setData('text/plain',event.currentTarget.dataset.type);event.dataTransfer.effectAllowed='copy';} allow(event){event.preventDefault();} drop(event){event.preventDefault();this.acceptDrop(event.dataTransfer.getData('text/plain'),null);}
  treeDrag(event){event.dataTransfer.setData('text/plain',`node:${event.currentTarget.dataset.id}`);event.dataTransfer.effectAllowed='move';}
  acceptDrop(type,parentId){if(type.startsWith('node:')){const id=type.slice(5);this.mutate(()=>{move(this.project.nodes,id,parentId);this.selectedId=id;});}else this.addType(type,parentId);} nodeDrop(event){event.stopPropagation();this.acceptDrop(event.detail.type,event.detail.parentId);}
- propertyChange(event){const {key,value}=event.detail;this.mutate(()=>{const prop=componentDefinition(this.selected.type)?.properties.find(p=>p.key===key);if(prop?.type==='number'&&(!Number.isFinite(value)||value<prop.min||value>prop.max))throw Error(`${prop.label}: enter ${prop.min} to ${prop.max}`);this.selected.props[key]=value;});}
+ propertyChange(event){const {key,value}=event.detail;this.mutate(()=>{const prop=componentDefinition(this.selected.type)?.properties.find(p=>p.key===key);if(prop?.type==='number'&&value!==''&&(!Number.isFinite(value)||value<prop.min||value>prop.max))throw Error(`${prop.label}: enter ${prop.min} to ${prop.max}`);this.selected.props[key]=value;if(key==='inputType'){this.selected.props.textFormat='any';this.selected.props.pattern='';}if(['input','search','price'].includes(this.selected.type)){validateInputConfig(this.selected);const error=validateInputValue(this.selected,this.selected.props.value,false);if(error){if(key==='inputType')this.selected.props.value=['checkbox','toggle'].includes(value)?false:'';else throw Error(error);}}});}
  change(event){const field=event.target.dataset.field,value=event.target.type==='number'?Number(event.target.value):event.target.value;this.mutate(()=>{if(field==='label')this.selected.label=value;else this.selected.props[field]=value;});}
  schemaChange(event){this.mutate(()=>{this.selected.data=clone(event.detail);});}
  dataChange(event){const field=event.target.dataset.field,value=event.target.value;this.mutate(()=>{this.selected.data[field]=value;});}

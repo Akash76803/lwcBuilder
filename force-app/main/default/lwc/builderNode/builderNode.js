@@ -1,5 +1,5 @@
 import { LightningElement, api } from 'lwc';
-import { componentDefinition } from 'c/builderModel';
+import { componentDefinition, effectiveInputType, inputPattern, validateInputValue } from 'c/builderModel';
 import { visible } from 'c/builderModel';
 export default class BuilderNode extends LightningElement {
  activeTab=''; collapsed=false;
@@ -18,7 +18,16 @@ export default class BuilderNode extends LightningElement {
  get emptyContainer(){return !this.node.children.length;}
  get disabled(){return !!this.node.props.disabled;} get required(){return !!this.node.props.required;}
  get placeholder(){return this.node.props.placeholder||'';}
- get inputType(){return this.node.type==='price'?'number':['checkbox','toggle'].includes(this.node.props.inputType)?'checkbox':this.node.props.inputType||'text';}
+ get inputType(){const type=effectiveInputType(this.node);return type==='phone'?'tel':type==='datetime-local'?'datetime':type;}
+ get isBaseInput(){return ['input','search','price'].includes(this.node.type);}
+ get inputMin(){return ['number','date','datetime','time'].includes(this.inputType)?(this.node.props.min!==''?this.node.props.min:undefined):undefined;}
+ get inputMax(){return ['number','date','datetime','time'].includes(this.inputType)?(this.node.props.max!==''?this.node.props.max:undefined):undefined;}
+ get inputStep(){return this.inputType==='number'?this.node.props.step||'1':undefined;}
+ get inputPattern(){return !['number','date','datetime','time','toggle','checkbox'].includes(this.inputType)?inputPattern(this.node)||undefined:undefined;}
+ get minLength(){return !['number','date','datetime','time','toggle','checkbox'].includes(this.inputType)?(this.node.props.minLength!==''?this.node.props.minLength:undefined):undefined;}
+ get maxLength(){return !['number','date','datetime','time','toggle','checkbox'].includes(this.inputType)?(this.node.props.maxLength!==''?this.node.props.maxLength:undefined):undefined;}
+ inputChange(event){const control=event.target;const value=['checkbox','toggle'].includes(this.inputType)?control.checked:control.value;const error=validateInputValue(this.node,value);control.setCustomValidity(error);if(!control.reportValidity()||error)return;if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value},bubbles:true,composed:true}));}
+ inputBlur(event){this.inputChange(event);}
  get checked(){return this.value===true||this.value==='true';}
  get isTextarea(){return ['textarea','richText'].includes(this.node.type);}
  get rows(){return Number(this.node.props.rows)||3;}
@@ -43,9 +52,9 @@ export default class BuilderNode extends LightningElement {
  get boundColumns(){const rows=Array.isArray(this.node.data.boundSample)?this.node.data.boundSample:[];return [...new Set(rows.flatMap(r=>Object.keys(r||{})))].map(key=>({key,label:key}));}
  get noBoundRows(){return !this.boundRows.length;}
  get boundRows(){const rows=Array.isArray(this.node.data.boundSample)?this.node.data.boundSample:[];return rows.map((r,index)=>({key:String(index),cells:this.boundColumns.map(c=>({key:c.key,value:typeof r[c.key]==='object'?JSON.stringify(r[c.key]):String(r[c.key]??'')}))}));}
- get isTable(){return this.node.type==='table';} get isButton(){return this.node.type==='button';} get isSearch(){return this.node.type==='search';}
+ get isTable(){return this.node.type==='table';} get isButton(){return this.node.type==='button';} get isSearch(){return false;}
  get isChild(){return this.node.type==='child';} get isCombo(){return this.node.type==='combobox';}
- get isInput(){return ['input','inputField','price'].includes(this.node.type);} get label(){return this.node.label;}
+ get isInput(){return this.node.type==='inputField';} get label(){return this.node.label;}
  get value(){return this.node.props.value;} get readonly(){return this.node.props.mode==='read';}
  get tag(){return `${this.node.type} · ${this.node.id}`;}
  select(event){event.stopPropagation();if(!this.preview)this.dispatchEvent(new CustomEvent('nodeselect',{detail:this.node.id,bubbles:true,composed:true}));}
