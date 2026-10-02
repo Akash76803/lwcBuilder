@@ -46,6 +46,7 @@ export default class BuilderNode extends LightningElement {
  get iconName(){return this.node.props.iconName||'utility:info';}
  get isIcon(){return this.node.type==='icon';}
  get isSelection(){return isSelectionType(this.node.type);}
+ tableChange(event){if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value:event.detail.rows,componentId:this.node.id,...event.detail},bubbles:true,composed:true}));}
  selectionChange(event){if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value:event.detail.value,componentId:this.node.id,selectedRecords:event.detail.records},bubbles:true,composed:true}));}
  get isOutput(){return ['outputField','helptext','badge','pill','spinner','fileUpload'].includes(this.node.type);}
  get outputCaption(){return ({spinner:'Loading indicator',fileUpload:'Salesforce file upload · visual configuration',lookup:'Record search · visual configuration',outputField:this.value,helptext:this.value,pill:'Removable selection',badge:''})[this.node.type];}

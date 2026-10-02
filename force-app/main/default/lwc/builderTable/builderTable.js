@@ -1,0 +1,20 @@
+import {LightningElement,api} from 'lwc';
+import {tableConfig,tableRows,evaluateTableRow,tableOutput} from 'c/builderTableModel';
+export default class BuilderTable extends LightningElement {
+ _node;signature='';inputs={};selection=[];message='';@api preview=false;
+ @api get node(){return this._node;}set node(n){const signature=JSON.stringify([n.id,n.props.tableConfig,n.data.boundSample,n.data.boundError]);if(signature!==this.signature){this.signature=signature;this.inputs={};this.selection=[];this.message='';}this._node=n;}
+ get config(){return tableConfig(this.node);}get sourceError(){try{tableRows(this.node);return '';}catch(e){return e.message;}}
+ get source(){try{return tableRows(this.node);}catch(e){return [];}}
+ get columns(){return this.config.columns.filter(c=>c.visible).map(c=>({...c,style:`width:${c.width}px;min-width:${c.width}px;text-align:${c.align};`}));}
+ get groups(){const groups=[];this.columns.forEach(c=>{const last=groups[groups.length-1];if(last&&last.label===c.group)last.span++;else groups.push({id:c.id,label:c.group||'Fields',span:1});});return groups;}
+ get grouped(){return this.config.grouped;}get hasSelection(){return this.config.selection!=='none';}get selectType(){return this.config.selection==='single'?'radio':'checkbox';}get selectName(){return 'table-'+this.node.id;}
+ get tableClass(){const c=this.config;return `table ${c.density==='compact'?'compact':''} ${c.striped?'striped':''} ${c.grid?'grid':''}`;}
+ get evaluated(){const c=this.config;return this.source.map((row,i)=>({row,index:i,result:evaluateTableRow(row,this.inputs[i]||{},c)}));}
+ get rows(){return this.evaluated.map(({row,index,result})=>({key:String(index),errorKey:'error-'+index,index,selected:this.selection.includes(index),cls:result.issues.length?'invalid':'',error:result.issues.map(i=>(i.effect==='warn'?'Warning: ':'')+i.message).join(' · '),hasError:!!result.issues.length,cells:this.columns.map(c=>({id:c.id,value:result.values[c.id]??'',checked:result.values[c.id]===true,isInput:c.source==='input',isCheckbox:c.source==='input'&&c.inputType==='checkbox',isTextInput:c.source==='input'&&c.inputType!=='checkbox',type:c.inputType,required:c.required,min:c.min!==''?c.min:undefined,max:c.max!==''?c.max:undefined,step:'any',style:c.style,label:c.label+' row '+(index+1),invalid:result.issues.some(i=>i.column===c.id),display:typeof result.values[c.id]==='number'?Number(result.values[c.id].toFixed(2)).toLocaleString('en-IN'):String(result.values[c.id]??'—')}))}));}
+ get colspan(){return this.columns.length+(this.hasSelection?1:0);}get noRows(){return !this.rows.length;}get blocked(){return !!this.sourceError||this.evaluated.some(r=>!r.result.valid);}get summary(){return `${this.rows.length} rows · ${this.selection.length} selected · ${this.evaluated.filter(r=>r.result.issues.length).length} rows with issues`;}
+ selectColumn(event){event.stopPropagation();if(!this.preview)this.dispatchEvent(new CustomEvent('tablecolumnselect',{detail:{nodeId:this.node.id,columnId:event.currentTarget.dataset.id},bubbles:true,composed:true}));}
+ edit(event){const {index,id}=event.target.dataset,c=this.config.columns.find(c=>c.id===id);const value=c.inputType==='checkbox'?event.target.checked:event.target.value;this.inputs={...this.inputs,[index]:{...(this.inputs[index]||{}),[c.key]:value}};this.message='Unsaved sample changes';this.emit('cellchange');}
+ select(event){const i=Number(event.target.dataset.index);this.selection=this.config.selection==='single'?[i]:event.target.checked?[...this.selection,i]:this.selection.filter(x=>x!==i);this.emit('rowselection');}
+ emit(type){const c=this.config,rows=this.evaluated.map(r=>tableOutput(r.row,this.inputs[r.index]||{},c,r.result));this.dispatchEvent(new CustomEvent('tablechange',{detail:{type,rows,selectedRows:this.selection.map(i=>rows[i]),valid:!this.blocked},bubbles:false}));}
+ save(){if(this.blocked)return;this.emit('save');this.message='Sample rows saved in Preview only · no Salesforce write';}
+}

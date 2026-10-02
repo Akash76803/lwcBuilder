@@ -1,9 +1,11 @@
 import { LightningElement } from 'lwc';
+import {validateTableConfig} from 'c/builderTableModel';
 import { clone, palette, sample, flatten, find, makeNode, insert, remove, move, parentOf, validateProject } from 'c/builderModel';
 import { componentDefinition, canContain, validateInputConfig, validateInputValue, isSelectionType } from 'c/builderModel';
 import { validatePackCollection, bindablePaths, resolveBinding } from 'c/builderDataPackModel';
 export default class LwcBuilder extends LightningElement {
  project=sample(); selectedId='items'; active='Design'; inspector='Properties'; paletteTab='Components'; search=''; history=[]; future=[]; message='Phase 1 · Configuration and sample data only'; modal=''; prompt=''; logs=[]; aiMessages=[]; draftName=''; previewState={'Order Status':'Draft','Permission Can Edit Orders':'true'};
+ tableColumnId='';
  tabs=['Design','Data Packs','Data','Rules','Communication','Actions']; propTabs=['Properties','Bindings','Rules'];
  get navigation(){return this.tabs.map(label=>({label,cls:this.active===label?'nav active':'nav'}));}
  get propertyTabs(){return this.propTabs.map(label=>({label,cls:this.inspector===label?'nav active':'nav'}));}
@@ -16,6 +18,10 @@ export default class LwcBuilder extends LightningElement {
  get boundDefinition(){return this.bindingPack?.versions.find(v=>v.version===Number(this.binding.version))?.definition;}
  get versionOptions(){return (this.bindingPack?.versions||[]).map(v=>({value:v.version,selected:v.version===Number(this.binding.version)}));}
  get outputOptions(){const definition=this.boundDefinition;if(!definition)return [];const kind=this.selected.type==='table'?'List':componentDefinition(this.selected.type)?.binding||'Value';return bindablePaths(definition).filter(r=>r.kind===kind&&!r.bindingPath.includes('[]')).map(r=>({value:r.bindingPath,label:r.bindingPath,selected:r.bindingPath===this.binding.outputPath}));}
+ get isTableSelected(){return this.selected?.type==='table';}
+ get selectedTable(){return find(this.boundNodes,this.selectedId);}
+ get tablePaths(){const prefix=(this.binding.outputPath||'')+'[].';return this.boundDefinition?bindablePaths(this.boundDefinition).filter(r=>r.kind==='Value'&&r.bindingPath.startsWith(prefix)&&!r.bindingPath.slice(prefix.length).includes('[]')).map(r=>r.bindingPath.slice(prefix.length)):[];}
+ tableColumnSelect(event){this.selectedId=event.detail.nodeId;this.tableColumnId=event.detail.columnId;this.active='Design';this.inspector='Properties';}
  get selectedComponent(){return componentDefinition(this.selected?.type)?.label||'';}
  get bindingInputs(){return (this.boundDefinition?.inputs||[]).map(i=>({...i,value:Object.prototype.hasOwnProperty.call(this.binding.inputValues||{},i.id)?this.binding.inputValues[i.id]:i.defaultValue??''}));}
  bindingChange(event){const field=event.target.dataset.field,value=event.target.value;this.mutate(()=>{const binding={...this.binding,[field]:value};if(field==='packId'){binding.version='';binding.outputPath='';binding.inputValues={};}if(field==='version'){binding.outputPath='';binding.inputValues={};}this.selected.data.packBinding=binding;});}
@@ -33,7 +39,7 @@ export default class LwcBuilder extends LightningElement {
  get targets(){return [{label:'Record Page',value:'lightning__RecordPage'},{label:'App Page',value:'lightning__AppPage'},{label:'Home Page',value:'lightning__HomePage'},{label:'Quick Action',value:'lightning__RecordAction'}].map(t=>({...t,selected:t.value===this.project.target}));}
  id(){return `n${Date.now().toString(36)}${Math.random().toString(36).slice(2,7)}`;}
  record(text){this.logs=[{id:this.id(),text},...this.logs].slice(0,40);this.message=text;}
- mutate(fn){const before=clone(this.project);try{fn();validateProject(this.project);validatePackCollection(this.project.dataPacks);this.history=[...this.history,before].slice(-40);this.future=[];this.project=clone(this.project);this.record('Design updated · Export JSON to keep a durable copy');}catch(e){this.project=before;this.ensureSelection();this.record(e.message);}}
+ mutate(fn){const before=clone(this.project);try{fn();validateProject(this.project);for(const n of flatten(this.project.nodes)){const node=find(this.project.nodes,n.id);if(node.type==='table'&&node.props.tableConfig)validateTableConfig(node.props.tableConfig);}validatePackCollection(this.project.dataPacks);this.history=[...this.history,before].slice(-40);this.future=[];this.project=clone(this.project);this.record('Design updated · Export JSON to keep a durable copy');}catch(e){this.project=before;this.ensureSelection();this.record(e.message);}}
  nav(event){this.active=event.currentTarget.dataset.tab;} propTab(event){this.inspector=event.currentTarget.dataset.tab;} paletteMode(event){this.paletteTab=event.currentTarget.dataset.tab;}
  searchChange(event){this.search=event.target.value;} select(event){this.selectedId=event.detail;} treeSelect(event){this.selectedId=event.currentTarget.dataset.id;}
  add(event){this.addType(event.currentTarget.dataset.type);} addType(type,parentId){this.mutate(()=>{const n=makeNode(type,this.id());const selected=this.selected;const parent=parentId===undefined?(componentDefinition(selected?.type)?.container?selected.id:parentOf(this.project.nodes,this.selectedId)?.id):parentId;insert(this.project.nodes,n,parent);this.selectedId=n.id;});}
