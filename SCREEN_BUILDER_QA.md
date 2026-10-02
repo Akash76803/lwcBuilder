@@ -48,3 +48,11 @@ Picklist options: one option per line, either plain label or API-value|Display l
 Dev Org UAT: add all three types; search by primary/secondary text, select/remove, verify no duplicate warehouse, picklist select/clear, no-results, required messages, disabled, min/max limits, defaults and Save/Open. Configure two records with nested Account.Name, then bind a published sample List and verify replacement of sample rows. Verify empty/invalid source messages. Preview emits scalar ID/null for Lookup and value arrays for multiple selectors; communication execution remains separate.
 
 Local evidence: 41 model tests, 27 compiled source files, compiled-app selection smoke with mocked Salesforce input/icon. Actual Dev Org rendering and UAT pending.
+
+## Compact selection layout
+
+Lookup, Multi-select Lookup and Multi-select Picklist now share a single-line closed control: first selected pill, +N overflow count, search and dropdown arrow. Results, full selected pills, picklist tools and selected count render only while the dropdown is open. All selections can be removed from the open panel; closed first-pill removal remains available. Single lookup closes after selection. Done/Escape return focus to the arrow, outside pointer click and keyboard focus leaving the component close the dropdown. Search focus/input or ArrowDown opens it. Disabled/read mode blocks opening and editing. Listeners are removed on component disconnect.
+
+No project migration or data-provider changes. Configured defaults persist; interactive choices remain sample session state. Object API name is still saved context only; searchable object selection/source enforcement is pending separate work.
+
+Local checks: 27 files compile, compact compiled-app interaction smoke PASS (all three types, collapsed initial state, count, remove, search, Done, Escape, outside click and clear). Model suite remains 41 tests. Dev Org UAT must check narrow columns, long selected labels, click/Tab inside dropdown, overlapping neighboring inputs, bottom-of-canvas/Preview scrolling and clipping; visual layout was not verified in a real Salesforce browser.
