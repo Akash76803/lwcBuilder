@@ -1,0 +1,1704 @@
+[
+  {
+    "kind": "stock50",
+    "node": {
+      "id": "items",
+      "type": "table",
+      "label": "Order Items",
+      "children": [],
+      "props": {
+        "tableConfig": {
+          "version": 1,
+          "view": {
+            "sortable": false,
+            "pageSize": 0
+          },
+          "identity": {
+            "mode": "field",
+            "fields": [
+              "Id"
+            ]
+          },
+          "outputPacks": [
+            {
+              "id": "p",
+              "name": "runtime",
+              "scope": "selected",
+              "updateMode": "snapshot"
+            }
+          ],
+          "eventActions": [],
+          "columns": [
+            {
+              "id": "f0",
+              "label": "Product",
+              "source": "field",
+              "path": "product.Name",
+              "key": "value_f0",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "f1",
+              "label": "My stock",
+              "source": "field",
+              "path": "stock",
+              "key": "value_f1",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "f2",
+              "label": "Unit price ₹",
+              "source": "field",
+              "path": "price",
+              "key": "value_f2",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "qty",
+              "label": "Quantity",
+              "source": "input",
+              "path": "",
+              "key": "quantity",
+              "inputType": "number",
+              "defaultValue": 1,
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": 0,
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            }
+          ],
+          "density": "comfortable",
+          "striped": false,
+          "grid": true,
+          "grouped": true,
+          "selection": "multiple",
+          "discounts": {
+            "enabled": false,
+            "quantity": "qty",
+            "price": "f2",
+            "mode": "same"
+          },
+          "rules": [
+            {
+              "id": "s",
+              "enabled": true,
+              "kind": "compare",
+              "left": "qty",
+              "operator": "lte",
+              "rightKind": "field",
+              "right": "stock",
+              "effect": "block",
+              "message": "Quantity {value}, stock {limit}",
+              "messageRefs": {}
+            }
+          ]
+        }
+      },
+      "data": {}
+    },
+    "inputs": {
+      "p1": {
+        "quantity": 50
+      }
+    },
+    "event": {
+      "type": "rowselection",
+      "rowId": "p1",
+      "row": {
+        "Id": "p1",
+        "product": {
+          "Name": "MIKA 3366 SUD",
+          "SKU": "3366SUD",
+          "HSN": "482390"
+        },
+        "stock": 48,
+        "price": 100,
+        "quantity": 50
+      },
+      "rowValid": false,
+      "rowIssues": [
+        {
+          "message": "Quantity 50, stock 48",
+          "column": "qty",
+          "effect": "block"
+        }
+      ],
+      "changedField": null,
+      "previousValue": null,
+      "value": null,
+      "selected": true,
+      "rows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 50
+        },
+        {
+          "Id": "p2",
+          "product": {
+            "Name": "Oak Natural",
+            "SKU": "OAK1220",
+            "HSN": "441114"
+          },
+          "stock": 32,
+          "price": 200,
+          "quantity": 1
+        }
+      ],
+      "rowIds": [
+        "p1",
+        "p2"
+      ],
+      "entries": [
+        {
+          "rowId": "p1",
+          "data": {
+            "Id": "p1",
+            "product": {
+              "Name": "MIKA 3366 SUD",
+              "SKU": "3366SUD",
+              "HSN": "482390"
+            },
+            "stock": 48,
+            "price": 100,
+            "quantity": 50
+          },
+          "values": {
+            "f0": "MIKA 3366 SUD",
+            "f1": 48,
+            "f2": 100,
+            "qty": 50
+          },
+          "valid": false,
+          "issues": [
+            {
+              "message": "Quantity 50, stock 48",
+              "column": "qty",
+              "effect": "block"
+            }
+          ]
+        },
+        {
+          "rowId": "p2",
+          "data": {
+            "Id": "p2",
+            "product": {
+              "Name": "Oak Natural",
+              "SKU": "OAK1220",
+              "HSN": "441114"
+            },
+            "stock": 32,
+            "price": 200,
+            "quantity": 1
+          },
+          "values": {
+            "f0": "Oak Natural",
+            "f1": 32,
+            "f2": 200,
+            "qty": 1
+          },
+          "valid": true,
+          "issues": []
+        }
+      ],
+      "selectedRows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 50
+        }
+      ],
+      "changedRows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 50
+        }
+      ],
+      "outputPacks": {
+        "runtime": {
+          "id": "p",
+          "name": "runtime",
+          "items": [
+            {
+              "rowId": "p1",
+              "data": {
+                "Id": "p1",
+                "product": {
+                  "Name": "MIKA 3366 SUD",
+                  "SKU": "3366SUD",
+                  "HSN": "482390"
+                },
+                "stock": 48,
+                "price": 100,
+                "quantity": 50
+              },
+              "values": {
+                "f0": "MIKA 3366 SUD",
+                "f1": 48,
+                "f2": 100,
+                "qty": 50
+              },
+              "valid": false,
+              "issues": [
+                {
+                  "message": "Quantity 50, stock 48",
+                  "column": "qty",
+                  "effect": "block"
+                }
+              ]
+            }
+          ],
+          "valid": false,
+          "sessionOnly": true
+        }
+      },
+      "actionResults": [],
+      "valid": false
+    },
+    "summary": {
+      "sourceTableId": "items",
+      "scope": "selected",
+      "groupBy": "",
+      "metrics": [
+        {
+          "id": "qty",
+          "label": "Units",
+          "path": "quantity",
+          "operation": "sum"
+        }
+      ]
+    },
+    "expectedSummary": [
+      {
+        "id": "0",
+        "label": "All items",
+        "count": 1,
+        "cells": [
+          {
+            "id": "qty",
+            "label": "Units",
+            "value": 50
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "stock48",
+    "node": {
+      "id": "items",
+      "type": "table",
+      "label": "Order Items",
+      "children": [],
+      "props": {
+        "tableConfig": {
+          "version": 1,
+          "view": {
+            "sortable": false,
+            "pageSize": 0
+          },
+          "identity": {
+            "mode": "field",
+            "fields": [
+              "Id"
+            ]
+          },
+          "outputPacks": [
+            {
+              "id": "p",
+              "name": "runtime",
+              "scope": "selected",
+              "updateMode": "snapshot"
+            }
+          ],
+          "eventActions": [],
+          "columns": [
+            {
+              "id": "f0",
+              "label": "Product",
+              "source": "field",
+              "path": "product.Name",
+              "key": "value_f0",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "f1",
+              "label": "My stock",
+              "source": "field",
+              "path": "stock",
+              "key": "value_f1",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "f2",
+              "label": "Unit price ₹",
+              "source": "field",
+              "path": "price",
+              "key": "value_f2",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "qty",
+              "label": "Quantity",
+              "source": "input",
+              "path": "",
+              "key": "quantity",
+              "inputType": "number",
+              "defaultValue": 1,
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": 0,
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            }
+          ],
+          "density": "comfortable",
+          "striped": false,
+          "grid": true,
+          "grouped": true,
+          "selection": "multiple",
+          "discounts": {
+            "enabled": false,
+            "quantity": "qty",
+            "price": "f2",
+            "mode": "same"
+          },
+          "rules": [
+            {
+              "id": "s",
+              "enabled": true,
+              "kind": "compare",
+              "left": "qty",
+              "operator": "lte",
+              "rightKind": "field",
+              "right": "stock",
+              "effect": "block",
+              "message": "Quantity {value}, stock {limit}",
+              "messageRefs": {}
+            }
+          ]
+        }
+      },
+      "data": {}
+    },
+    "inputs": {
+      "p1": {
+        "quantity": 48
+      }
+    },
+    "event": {
+      "type": "rowselection",
+      "rowId": "p1",
+      "row": {
+        "Id": "p1",
+        "product": {
+          "Name": "MIKA 3366 SUD",
+          "SKU": "3366SUD",
+          "HSN": "482390"
+        },
+        "stock": 48,
+        "price": 100,
+        "quantity": 48
+      },
+      "rowValid": true,
+      "rowIssues": [],
+      "changedField": null,
+      "previousValue": null,
+      "value": null,
+      "selected": true,
+      "rows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 48
+        },
+        {
+          "Id": "p2",
+          "product": {
+            "Name": "Oak Natural",
+            "SKU": "OAK1220",
+            "HSN": "441114"
+          },
+          "stock": 32,
+          "price": 200,
+          "quantity": 1
+        }
+      ],
+      "rowIds": [
+        "p1",
+        "p2"
+      ],
+      "entries": [
+        {
+          "rowId": "p1",
+          "data": {
+            "Id": "p1",
+            "product": {
+              "Name": "MIKA 3366 SUD",
+              "SKU": "3366SUD",
+              "HSN": "482390"
+            },
+            "stock": 48,
+            "price": 100,
+            "quantity": 48
+          },
+          "values": {
+            "f0": "MIKA 3366 SUD",
+            "f1": 48,
+            "f2": 100,
+            "qty": 48
+          },
+          "valid": true,
+          "issues": []
+        },
+        {
+          "rowId": "p2",
+          "data": {
+            "Id": "p2",
+            "product": {
+              "Name": "Oak Natural",
+              "SKU": "OAK1220",
+              "HSN": "441114"
+            },
+            "stock": 32,
+            "price": 200,
+            "quantity": 1
+          },
+          "values": {
+            "f0": "Oak Natural",
+            "f1": 32,
+            "f2": 200,
+            "qty": 1
+          },
+          "valid": true,
+          "issues": []
+        }
+      ],
+      "selectedRows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 48
+        }
+      ],
+      "changedRows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 48
+        }
+      ],
+      "outputPacks": {
+        "runtime": {
+          "id": "p",
+          "name": "runtime",
+          "items": [
+            {
+              "rowId": "p1",
+              "data": {
+                "Id": "p1",
+                "product": {
+                  "Name": "MIKA 3366 SUD",
+                  "SKU": "3366SUD",
+                  "HSN": "482390"
+                },
+                "stock": 48,
+                "price": 100,
+                "quantity": 48
+              },
+              "values": {
+                "f0": "MIKA 3366 SUD",
+                "f1": 48,
+                "f2": 100,
+                "qty": 48
+              },
+              "valid": true,
+              "issues": []
+            }
+          ],
+          "valid": true,
+          "sessionOnly": true
+        }
+      },
+      "actionResults": [],
+      "valid": true
+    },
+    "summary": {
+      "sourceTableId": "items",
+      "scope": "selected",
+      "groupBy": "",
+      "metrics": [
+        {
+          "id": "qty",
+          "label": "Units",
+          "path": "quantity",
+          "operation": "sum"
+        }
+      ]
+    },
+    "expectedSummary": [
+      {
+        "id": "0",
+        "label": "All items",
+        "count": 1,
+        "cells": [
+          {
+            "id": "qty",
+            "label": "Units",
+            "value": 48
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "discount105",
+    "node": {
+      "id": "items",
+      "type": "table",
+      "label": "Order Items",
+      "children": [],
+      "props": {
+        "tableConfig": {
+          "version": 1,
+          "view": {
+            "sortable": false,
+            "pageSize": 0
+          },
+          "identity": {
+            "mode": "field",
+            "fields": [
+              "Id"
+            ]
+          },
+          "outputPacks": [
+            {
+              "id": "p",
+              "name": "runtime",
+              "scope": "selected",
+              "updateMode": "snapshot"
+            }
+          ],
+          "eventActions": [],
+          "columns": [
+            {
+              "id": "f0",
+              "label": "Product",
+              "source": "field",
+              "path": "product.Name",
+              "key": "value_f0",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "f1",
+              "label": "My stock",
+              "source": "field",
+              "path": "stock",
+              "key": "value_f1",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "f2",
+              "label": "Unit price ₹",
+              "source": "field",
+              "path": "price",
+              "key": "value_f2",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "qty",
+              "label": "Quantity",
+              "source": "input",
+              "path": "",
+              "key": "quantity",
+              "inputType": "number",
+              "defaultValue": 1,
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": 0,
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "trade",
+              "label": "trade",
+              "source": "input",
+              "path": "",
+              "key": "trade",
+              "inputType": "number",
+              "defaultValue": 20,
+              "visible": true,
+              "group": "",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "percent",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "scheme",
+              "label": "scheme",
+              "source": "input",
+              "path": "",
+              "key": "scheme",
+              "inputType": "number",
+              "defaultValue": 300,
+              "visible": true,
+              "group": "",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "amount",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "extra",
+              "label": "extra",
+              "source": "input",
+              "path": "",
+              "key": "extra",
+              "inputType": "number",
+              "defaultValue": 10,
+              "visible": true,
+              "group": "",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "percent",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "special",
+              "label": "special",
+              "source": "input",
+              "path": "",
+              "key": "special",
+              "inputType": "number",
+              "defaultValue": 450,
+              "visible": true,
+              "group": "",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "amount",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "net",
+              "label": "Net",
+              "source": "calculated",
+              "path": "",
+              "key": "value_net",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "net",
+              "left": "",
+              "right": ""
+            }
+          ],
+          "density": "comfortable",
+          "striped": false,
+          "grid": true,
+          "grouped": true,
+          "selection": "multiple",
+          "discounts": {
+            "enabled": true,
+            "quantity": "qty",
+            "price": "f2",
+            "mode": "same"
+          },
+          "rules": [
+            {
+              "id": "d",
+              "kind": "discount",
+              "enabled": true,
+              "effect": "block",
+              "message": "Over {value} / {limit}",
+              "messageRefs": {}
+            },
+            {
+              "id": "n",
+              "kind": "net",
+              "enabled": true,
+              "effect": "block",
+              "messageRefs": {}
+            }
+          ]
+        }
+      },
+      "data": {}
+    },
+    "inputs": {
+      "p1": {
+        "quantity": 10
+      }
+    },
+    "event": {
+      "type": "rowselection",
+      "rowId": "p1",
+      "row": {
+        "Id": "p1",
+        "product": {
+          "Name": "MIKA 3366 SUD",
+          "SKU": "3366SUD",
+          "HSN": "482390"
+        },
+        "stock": 48,
+        "price": 100,
+        "quantity": 10,
+        "trade": 20,
+        "scheme": 300,
+        "extra": 10,
+        "special": 450,
+        "net": -50
+      },
+      "rowValid": false,
+      "rowIssues": [
+        {
+          "message": "Over 105 / 100",
+          "column": "",
+          "effect": "block"
+        },
+        {
+          "message": "Row validation failed: -50 / 0",
+          "column": "",
+          "effect": "block"
+        }
+      ],
+      "changedField": null,
+      "previousValue": null,
+      "value": null,
+      "selected": true,
+      "rows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 10,
+          "trade": 20,
+          "scheme": 300,
+          "extra": 10,
+          "special": 450,
+          "net": -50
+        },
+        {
+          "Id": "p2",
+          "product": {
+            "Name": "Oak Natural",
+            "SKU": "OAK1220",
+            "HSN": "441114"
+          },
+          "stock": 32,
+          "price": 200,
+          "quantity": 1,
+          "trade": 20,
+          "scheme": 300,
+          "extra": 10,
+          "special": 450,
+          "net": -610
+        }
+      ],
+      "rowIds": [
+        "p1",
+        "p2"
+      ],
+      "entries": [
+        {
+          "rowId": "p1",
+          "data": {
+            "Id": "p1",
+            "product": {
+              "Name": "MIKA 3366 SUD",
+              "SKU": "3366SUD",
+              "HSN": "482390"
+            },
+            "stock": 48,
+            "price": 100,
+            "quantity": 10,
+            "trade": 20,
+            "scheme": 300,
+            "extra": 10,
+            "special": 450,
+            "net": -50
+          },
+          "values": {
+            "f0": "MIKA 3366 SUD",
+            "f1": 48,
+            "f2": 100,
+            "qty": 10,
+            "trade": 20,
+            "scheme": 300,
+            "extra": 10,
+            "special": 450,
+            "net": -50
+          },
+          "valid": false,
+          "issues": [
+            {
+              "message": "Over 105 / 100",
+              "column": "",
+              "effect": "block"
+            },
+            {
+              "message": "Row validation failed: -50 / 0",
+              "column": "",
+              "effect": "block"
+            }
+          ]
+        },
+        {
+          "rowId": "p2",
+          "data": {
+            "Id": "p2",
+            "product": {
+              "Name": "Oak Natural",
+              "SKU": "OAK1220",
+              "HSN": "441114"
+            },
+            "stock": 32,
+            "price": 200,
+            "quantity": 1,
+            "trade": 20,
+            "scheme": 300,
+            "extra": 10,
+            "special": 450,
+            "net": -610
+          },
+          "values": {
+            "f0": "Oak Natural",
+            "f1": 32,
+            "f2": 200,
+            "qty": 1,
+            "trade": 20,
+            "scheme": 300,
+            "extra": 10,
+            "special": 450,
+            "net": -610
+          },
+          "valid": false,
+          "issues": [
+            {
+              "message": "Over 405 / 100",
+              "column": "",
+              "effect": "block"
+            },
+            {
+              "message": "Row validation failed: -610 / 0",
+              "column": "",
+              "effect": "block"
+            }
+          ]
+        }
+      ],
+      "selectedRows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 10,
+          "trade": 20,
+          "scheme": 300,
+          "extra": 10,
+          "special": 450,
+          "net": -50
+        }
+      ],
+      "changedRows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 10,
+          "trade": 20,
+          "scheme": 300,
+          "extra": 10,
+          "special": 450,
+          "net": -50
+        }
+      ],
+      "outputPacks": {
+        "runtime": {
+          "id": "p",
+          "name": "runtime",
+          "items": [
+            {
+              "rowId": "p1",
+              "data": {
+                "Id": "p1",
+                "product": {
+                  "Name": "MIKA 3366 SUD",
+                  "SKU": "3366SUD",
+                  "HSN": "482390"
+                },
+                "stock": 48,
+                "price": 100,
+                "quantity": 10,
+                "trade": 20,
+                "scheme": 300,
+                "extra": 10,
+                "special": 450,
+                "net": -50
+              },
+              "values": {
+                "f0": "MIKA 3366 SUD",
+                "f1": 48,
+                "f2": 100,
+                "qty": 10,
+                "trade": 20,
+                "scheme": 300,
+                "extra": 10,
+                "special": 450,
+                "net": -50
+              },
+              "valid": false,
+              "issues": [
+                {
+                  "message": "Over 105 / 100",
+                  "column": "",
+                  "effect": "block"
+                },
+                {
+                  "message": "Row validation failed: -50 / 0",
+                  "column": "",
+                  "effect": "block"
+                }
+              ]
+            }
+          ],
+          "valid": false,
+          "sessionOnly": true
+        }
+      },
+      "actionResults": [],
+      "valid": false
+    },
+    "summary": {
+      "sourceTableId": "items",
+      "scope": "selected",
+      "groupBy": "",
+      "metrics": [
+        {
+          "id": "qty",
+          "label": "Units",
+          "path": "quantity",
+          "operation": "sum"
+        }
+      ]
+    },
+    "expectedSummary": [
+      {
+        "id": "0",
+        "label": "All items",
+        "count": 1,
+        "cells": [
+          {
+            "id": "qty",
+            "label": "Units",
+            "value": 10
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "kind": "discount100",
+    "node": {
+      "id": "items",
+      "type": "table",
+      "label": "Order Items",
+      "children": [],
+      "props": {
+        "tableConfig": {
+          "version": 1,
+          "view": {
+            "sortable": false,
+            "pageSize": 0
+          },
+          "identity": {
+            "mode": "field",
+            "fields": [
+              "Id"
+            ]
+          },
+          "outputPacks": [
+            {
+              "id": "p",
+              "name": "runtime",
+              "scope": "selected",
+              "updateMode": "snapshot"
+            }
+          ],
+          "eventActions": [],
+          "columns": [
+            {
+              "id": "f0",
+              "label": "Product",
+              "source": "field",
+              "path": "product.Name",
+              "key": "value_f0",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "f1",
+              "label": "My stock",
+              "source": "field",
+              "path": "stock",
+              "key": "value_f1",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "f2",
+              "label": "Unit price ₹",
+              "source": "field",
+              "path": "price",
+              "key": "value_f2",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "qty",
+              "label": "Quantity",
+              "source": "input",
+              "path": "",
+              "key": "quantity",
+              "inputType": "number",
+              "defaultValue": 1,
+              "visible": true,
+              "group": "Product & pricing",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": 0,
+              "max": "",
+              "discount": "none",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "trade",
+              "label": "trade",
+              "source": "input",
+              "path": "",
+              "key": "trade",
+              "inputType": "number",
+              "defaultValue": 20,
+              "visible": true,
+              "group": "",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "percent",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "scheme",
+              "label": "scheme",
+              "source": "input",
+              "path": "",
+              "key": "scheme",
+              "inputType": "number",
+              "defaultValue": 300,
+              "visible": true,
+              "group": "",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "amount",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "extra",
+              "label": "extra",
+              "source": "input",
+              "path": "",
+              "key": "extra",
+              "inputType": "number",
+              "defaultValue": 10,
+              "visible": true,
+              "group": "",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "percent",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "special",
+              "label": "special",
+              "source": "input",
+              "path": "",
+              "key": "special",
+              "inputType": "number",
+              "defaultValue": 450,
+              "visible": true,
+              "group": "",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "amount",
+              "calculation": "multiply",
+              "left": "",
+              "right": ""
+            },
+            {
+              "id": "net",
+              "label": "Net",
+              "source": "calculated",
+              "path": "",
+              "key": "value_net",
+              "inputType": "text",
+              "defaultValue": "",
+              "visible": true,
+              "group": "",
+              "width": 140,
+              "align": "left",
+              "required": false,
+              "min": "",
+              "max": "",
+              "discount": "none",
+              "calculation": "net",
+              "left": "",
+              "right": ""
+            }
+          ],
+          "density": "comfortable",
+          "striped": false,
+          "grid": true,
+          "grouped": true,
+          "selection": "multiple",
+          "discounts": {
+            "enabled": true,
+            "quantity": "qty",
+            "price": "f2",
+            "mode": "same"
+          },
+          "rules": [
+            {
+              "id": "d",
+              "kind": "discount",
+              "enabled": true,
+              "effect": "block",
+              "message": "Over {value} / {limit}",
+              "messageRefs": {}
+            },
+            {
+              "id": "n",
+              "kind": "net",
+              "enabled": true,
+              "effect": "block",
+              "messageRefs": {}
+            }
+          ]
+        }
+      },
+      "data": {}
+    },
+    "inputs": {
+      "p1": {
+        "quantity": 10,
+        "special": 400
+      }
+    },
+    "event": {
+      "type": "rowselection",
+      "rowId": "p1",
+      "row": {
+        "Id": "p1",
+        "product": {
+          "Name": "MIKA 3366 SUD",
+          "SKU": "3366SUD",
+          "HSN": "482390"
+        },
+        "stock": 48,
+        "price": 100,
+        "quantity": 10,
+        "trade": 20,
+        "scheme": 300,
+        "extra": 10,
+        "special": 400,
+        "net": 0
+      },
+      "rowValid": true,
+      "rowIssues": [],
+      "changedField": null,
+      "previousValue": null,
+      "value": null,
+      "selected": true,
+      "rows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 10,
+          "trade": 20,
+          "scheme": 300,
+          "extra": 10,
+          "special": 400,
+          "net": 0
+        },
+        {
+          "Id": "p2",
+          "product": {
+            "Name": "Oak Natural",
+            "SKU": "OAK1220",
+            "HSN": "441114"
+          },
+          "stock": 32,
+          "price": 200,
+          "quantity": 1,
+          "trade": 20,
+          "scheme": 300,
+          "extra": 10,
+          "special": 450,
+          "net": -610
+        }
+      ],
+      "rowIds": [
+        "p1",
+        "p2"
+      ],
+      "entries": [
+        {
+          "rowId": "p1",
+          "data": {
+            "Id": "p1",
+            "product": {
+              "Name": "MIKA 3366 SUD",
+              "SKU": "3366SUD",
+              "HSN": "482390"
+            },
+            "stock": 48,
+            "price": 100,
+            "quantity": 10,
+            "trade": 20,
+            "scheme": 300,
+            "extra": 10,
+            "special": 400,
+            "net": 0
+          },
+          "values": {
+            "f0": "MIKA 3366 SUD",
+            "f1": 48,
+            "f2": 100,
+            "qty": 10,
+            "trade": 20,
+            "scheme": 300,
+            "extra": 10,
+            "special": 400,
+            "net": 0
+          },
+          "valid": true,
+          "issues": []
+        },
+        {
+          "rowId": "p2",
+          "data": {
+            "Id": "p2",
+            "product": {
+              "Name": "Oak Natural",
+              "SKU": "OAK1220",
+              "HSN": "441114"
+            },
+            "stock": 32,
+            "price": 200,
+            "quantity": 1,
+            "trade": 20,
+            "scheme": 300,
+            "extra": 10,
+            "special": 450,
+            "net": -610
+          },
+          "values": {
+            "f0": "Oak Natural",
+            "f1": 32,
+            "f2": 200,
+            "qty": 1,
+            "trade": 20,
+            "scheme": 300,
+            "extra": 10,
+            "special": 450,
+            "net": -610
+          },
+          "valid": false,
+          "issues": [
+            {
+              "message": "Over 405 / 100",
+              "column": "",
+              "effect": "block"
+            },
+            {
+              "message": "Row validation failed: -610 / 0",
+              "column": "",
+              "effect": "block"
+            }
+          ]
+        }
+      ],
+      "selectedRows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 10,
+          "trade": 20,
+          "scheme": 300,
+          "extra": 10,
+          "special": 400,
+          "net": 0
+        }
+      ],
+      "changedRows": [
+        {
+          "Id": "p1",
+          "product": {
+            "Name": "MIKA 3366 SUD",
+            "SKU": "3366SUD",
+            "HSN": "482390"
+          },
+          "stock": 48,
+          "price": 100,
+          "quantity": 10,
+          "trade": 20,
+          "scheme": 300,
+          "extra": 10,
+          "special": 400,
+          "net": 0
+        }
+      ],
+      "outputPacks": {
+        "runtime": {
+          "id": "p",
+          "name": "runtime",
+          "items": [
+            {
+              "rowId": "p1",
+              "data": {
+                "Id": "p1",
+                "product": {
+                  "Name": "MIKA 3366 SUD",
+                  "SKU": "3366SUD",
+                  "HSN": "482390"
+                },
+                "stock": 48,
+                "price": 100,
+                "quantity": 10,
+                "trade": 20,
+                "scheme": 300,
+                "extra": 10,
+                "special": 400,
+                "net": 0
+              },
+              "values": {
+                "f0": "MIKA 3366 SUD",
+                "f1": 48,
+                "f2": 100,
+                "qty": 10,
+                "trade": 20,
+                "scheme": 300,
+                "extra": 10,
+                "special": 400,
+                "net": 0
+              },
+              "valid": true,
+              "issues": []
+            }
+          ],
+          "valid": true,
+          "sessionOnly": true
+        }
+      },
+      "actionResults": [],
+      "valid": false
+    },
+    "summary": {
+      "sourceTableId": "items",
+      "scope": "selected",
+      "groupBy": "",
+      "metrics": [
+        {
+          "id": "qty",
+          "label": "Units",
+          "path": "quantity",
+          "operation": "sum"
+        }
+      ]
+    },
+    "expectedSummary": [
+      {
+        "id": "0",
+        "label": "All items",
+        "count": 1,
+        "cells": [
+          {
+            "id": "qty",
+            "label": "Units",
+            "value": 10
+          }
+        ]
+      }
+    ]
+  }
+]

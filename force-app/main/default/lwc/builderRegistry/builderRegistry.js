@@ -31,7 +31,7 @@ const definitions=[
  ['search','Product Search','Custom',[...inputProps,...validationProperties]],['price','Price Editor','Custom',[...inputProps,...validationProperties]],['child','Child LWC','Custom',[text('componentName','Registered component name')]]
 ];
 const entries=definitions.map(([type,label,group,properties,container=false])=>({type,label,group,properties,container,events:['button','buttonIcon'].includes(type)?['click']:type==='table'?['rowselection','cellchange','save','rowaction']:['form','recordEditForm'].includes(type)?['submit','success','error']:type==='fileUpload'?['uploadfinished']:type==='child'?[]:container?[]:['change'],binding: ['table','summaryTable'].includes(type)||isSelectionType(type)?'List':['form','recordEditForm','recordViewForm'].includes(type)?'Object':'Value'}));
-export const registry=entries.map(entry=>({...entry,adapter:{propsIn:['node','preview'],eventsOut:entry.type==='table'?['tablechange']:isSelectionType(entry.type)?['selectionchange']:entry.events,commands:[]}}));
+export const registry=entries.map(entry=>({...entry,adapter:{propsIn:['node','preview'],eventsOut:entry.type==='table'?['tablechange']:isSelectionType(entry.type)?['selectionchange']:entry.events,commands:[],runtimeOutput:entry.type==='table',runtimeConsumer:entry.type==='summaryTable'?'summary':null,previewValue:entry.type==='table'?'rows':'value',previewRecords:isSelectionType(entry.type)?'records':null}}));
 export const componentDefinition=type=>registry.find(r=>r.type===type);
 export const defaultProperties=type=>Object.fromEntries((componentDefinition(type)?.properties||[]).map(p=>[p.key,p.default]));
 export function canContain(parentType,childType){

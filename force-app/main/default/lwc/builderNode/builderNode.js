@@ -3,7 +3,7 @@ import { componentDefinition, effectiveInputType, inputPattern, validateInputVal
 import { visible } from 'c/builderModel';
 export default class BuilderNode extends LightningElement {
  activeTab=''; collapsed=false;
- @api node; @api selectedId; @api preview=false; @api state;
+ @api runtime; @api node; @api selectedId; @api preview=false; @api state;
  get shown(){return !this.preview||visible(this.node,this.state||{});}
  get boxClass(){return `node ${this.node.id===this.selectedId&&!this.preview?'selected':''}`;}
  get style(){return `padding:${Number(this.node.props.padding)||0}px;`;} 
@@ -46,8 +46,7 @@ export default class BuilderNode extends LightningElement {
  get iconName(){return this.node.props.iconName||'utility:info';}
  get isIcon(){return this.node.type==='icon';}
  get isSelection(){return isSelectionType(this.node.type);}
- tableChange(event){this.dispatchEvent(new CustomEvent('tableoutput',{detail:{componentId:this.node.id,preview:this.preview,...event.detail},bubbles:true,composed:true}));if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value:event.detail.rows,componentId:this.node.id,...event.detail},bubbles:true,composed:true}));}
- selectionChange(event){if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value:event.detail.value,componentId:this.node.id,selectedRecords:event.detail.records},bubbles:true,composed:true}));}
+ adapterEvent(event){const contract=componentDefinition(this.node.type)?.adapter;if(!contract?.eventsOut.includes(event.type))return;const payload=event.detail;this.dispatchEvent(new CustomEvent('adapterevent',{detail:{componentId:this.node.id,preview:this.preview,eventName:event.type,payload},bubbles:true,composed:true}));if(this.preview){const detail={key:this.node.label,value:payload[contract.previewValue],componentId:this.node.id};if(contract.previewRecords)detail.selectedRecords=payload[contract.previewRecords];else Object.assign(detail,payload);this.dispatchEvent(new CustomEvent('previewchange',{detail,bubbles:true,composed:true}));}}
  get isOutput(){return ['outputField','helptext','badge','pill','spinner','fileUpload'].includes(this.node.type);}
  get outputCaption(){return ({spinner:'Loading indicator',fileUpload:'Salesforce file upload · visual configuration',lookup:'Record search · visual configuration',outputField:this.value,helptext:this.value,pill:'Removable selection',badge:''})[this.node.type];}
  get buttonClass(){return this.node.props.variant==='brand'?'primary':'';}
