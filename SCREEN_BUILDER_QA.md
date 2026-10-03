@@ -80,3 +80,33 @@ The existing Datatable now renders configurable columns rather than fixed markup
 5. Check nested tables, Preview dialog width, horizontal scrolling, grouped headers, alignment, hiding/reordering, narrow inspector and keyboard interactions. Salesforce visual/layout UAT is pending.
 
 Local evidence: **49 Node tests PASS**, **34 LWC source files compile**, compiled-app DOM smoke PASS for adding HSN, applying, header selection, stock 50/48 validation, four mixed discount inputs, totals, 105% blocked / 100% allowed and Undo. These are local checks, not a Salesforce deployment/UAT result.
+
+## User-defined formula columns and formula row rules — 2026-10-03
+
+Calculate → **+ Formula column** adds a numeric calculated column. Cell → Formula accepts clickable `[Header]` tokens, numeric literals, parentheses, + / − / * / ÷, comparisons (=, !=, <, <=, >, >=), AND / OR / NOT, TRUE / FALSE, ROUND, IF, SUM, MIN and MAX. IF and logical operators evaluate lazily. ROUND precision is 0–8. Arithmetic retains 15 significant digits to remove common binary floating noise; currency precision is explicit via ROUND, rather than automatic two-decimal rounding on every formula operation. GST percentage input must be numeric 18 for 18%, not the text `18%`.
+
+**Apply table** parses text to a validated expression tree with stable column IDs; header rename and column reordering preserve applied references. Formula drafts are not persisted before Apply. Ambiguous duplicate header labels cannot be typed as references; use distinct labels. Parser limits: 4096 characters / 512 expression nodes / nesting 50. Missing references, invalid function arguments, invalid syntax and dependency cycles reject Apply/import. JavaScript code is not executable. Rule expressions must return boolean and column expressions numeric. Runtime division-by-zero/missing numeric inputs show row errors and block Save; a failed validation condition may instead warn if configured. Hidden formula columns continue to compute.
+
+Inputs recalculate all dependent formulas and rules on **input**, including before blur. Rules → Add row rule defaults to kind formula; enabled, effect and message are editable, and header tokens can be inserted in its condition. Legacy two-column calculations and compare/discount/net rules remain supported.
+
+### A/B pricing configuration for UAT
+
+Create the following headers exactly (or insert your own tokens). Input/bound numeric headers: Unit Price, Qty, My Stock, Discount 1, Discount 2, Discount 3, GST. All three discounts below are percentages on the original Basic Value.
+
+| Calculated column | Formula |
+| --- | --- |
+| Basic Value | `[Unit Price] * [Qty]` |
+| Discount Amount | `[Basic Value] * SUM([Discount 1], [Discount 2], [Discount 3]) / 100` |
+| Total Discount % | `IF([Basic Value] = 0, IF([Discount Amount] = 0, 0, 101), [Discount Amount] / [Basic Value] * 100)` |
+| Taxable Amount | `ROUND([Basic Value] - [Discount Amount], 2)` |
+| Total GST | `ROUND([Taxable Amount] * [GST] / 100, 2)` |
+| Final Amount | `ROUND([Taxable Amount] + [Total GST], 2)` |
+
+Rules (formula kind, enabled, block): `[Total Discount %] <= 100`, `[Qty] <= [My Stock]`, `[Taxable Amount] >= 0`. Add numeric minima/required settings or formula rules for nonnegative inputs as your business requirements need. Calculation definitions do not automatically install business rules.
+
+- A: 231 / qty21 / stock50 / discounts12,31,66 / GST18 → Basic4851, discount109%, invalid. Change discount3 to56: taxable48.51, GST8.73, final57.24, valid.
+- B: 213 / qty32 / stock30 / discounts23,14,0 / GST18 → taxable4294.08, GST772.93, final5067.01; stock rule blocks. Change qty to30 and confirm immediate recomputation.
+- For Discount2 amount based, change Discount Amount to `[Basic Value] * ([Discount 1] + [Discount 3]) / 100 + [Discount 2]`. Total Discount % continues using the combined amount and zero-base guard.
+- Rename a referenced header, reorder columns, export/open JSON, Undo/Redo, toggle rule enable/warn and verify persistence. Test an unknown header, cycle and divisor zero. Check token insertion cursor placement and keyboard on Salesforce.
+
+Local validation: **56 Node tests PASS**, **34 LWC files compile**, compiled DOM formula smoke PASS (add/apply, immediate recalculation, rename, cycle rejection, formula stock 50/48); legacy custom table smoke PASS. Salesforce UAT remains pending. No live query, DML or cross-component execution is added here.

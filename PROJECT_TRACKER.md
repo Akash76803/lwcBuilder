@@ -10,3 +10,8 @@ Current next action: Dev Org UAT of Screen Builder foundation (categorized regis
 - Implemented on testing: generic field/input/calculated columns; Cell / Design / Calculate / Rules editor; nested Data Pack field choices, grouped headers, per-row edits/selection, optional mixed discounts, numeric row rules and sample Save output.
 - Local validation: 49 tests, 34 compiled LWC files, compiled-DOM table interaction smoke PASS. Prior selector selection fix is confirmed working by user in Dev Org.
 - Next: user deploy/UAT table designer and JSON round trip; then popup form builder and row action wiring. Live Salesforce queries/DML and cross-component execution remain pending.
+
+### Formula columns — 2026-10-03
+- Implemented: clickable header tokens, safe user formulas, stable ID references, dependent recalculation on input, boolean formula row validation and persistent definitions. Includes ROUND/IF/SUM/MIN/MAX, arithmetic/comparisons/logic; legacy table calculations preserved.
+- QA: 56 tests, 34 LWC files compile, formula and legacy table DOM interaction checks PASS. A/B pricing/GST, mixed amount/% discounts, zero base, rename, JSON, missing references and cycle cases covered locally.
+- Next: Dev Org UAT with the user's A/B table; then popup form builder. Live Salesforce data/save and cross-component execution remain pending.
