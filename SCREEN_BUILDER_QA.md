@@ -166,3 +166,9 @@ Follow-ups: general Binding resolver with typed source/target contracts; visibil
 - Deferred: active-tab State binding, configurable tabChange actions, new condition editor and Salesforce live execution. This change does not implement those mockup controls.
 - Verification: 125/125 Node tests; LWC compilation PASS; compiled Tabset DOM checks cover creation/add/nesting, rename/reorder/default, delete/Undo, keyboard, drop target, disabled fallback, copied defaults and Design/Preview table edit preservation. Existing formula, table, aggregate, compact selector, typed-input and behavior-core DOM regressions PASS. No org deployment; org UAT pending.
 - Manual UAT: add Tabset → Add Tab → drop Datatable into Products → edit/select rows → switch away/back → set Products default → Preview → rename/reorder → delete/Undo → export/import JSON. Confirm hidden/disabled fallback with the existing Rules editor.
+
+## Service bundle deployment packaging fix — 2026-10-03
+
+The ten behavior/registry/tab JavaScript modules were already tracked on testing, but their Salesforce .js-meta.xml files were omitted. Added matching LightningComponentBundle metadata for builderActionExecutor, builderDependencyGraph, builderEventRouter, builderExpression, builderMigration, builderRegistry, builderRuntimeCoordinator, builderStateStore, builderTabModel and builderValidation (API 66.0, isExposed false, matching existing service bundles). No HTML is needed for these API modules.
+
+Verification: all metadata parses as XML; every LWC folder has matching JS/metadata; all local c imports/template component references resolve to complete bundles. 127/127 Node tests PASS (125 prior tests preserved). This is a local packaging verification, not an org deployment result. No org deployment performed. Pull testing and include the complete force-app/main/default/lwc source directory in the next user-run deployment; deploying only lwcBuilder/builderNode excludes their dependencies.
