@@ -3,4 +3,6 @@
 .binding-error{color:#ba0517;background:#fff4f4;font-size:11px;padding:8px}.bound-json{font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:200px;overflow:auto}
 
 textarea{display:block;width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:4px;color:#16325c}input[type=checkbox]{width:auto}select[multiple]{height:auto;min-height:90px}.empty-container{font-size:12px;color:#64748b}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}@media(max-width:600px){.children.grid{grid-template-columns:1fr!important}}
-.choice{display:flex;align-items:center;gap:8px}.choice input{width:auto;margin:0}fieldset{border:0;padding:0}.tabstrip{display:flex;flex-wrap:wrap;gap:8px}.tabstrip button[aria-pressed=true]{background:#0176d3;color:white}
+.choice{display:flex;align-items:center;gap:8px}.choice input{width:auto;margin:0}fieldset{border:0;padding:0}.tabstrip{display:flex;flex-wrap:wrap;gap:8px}.tabstrip button[aria-selected=true]{background:#0176d3;color:white}
+
+.tab-panel[hidden]{display:none!important}.add-tab{margin:10px 0}.tabstrip button:disabled{opacity:.5;cursor:default}

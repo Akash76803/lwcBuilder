@@ -155,3 +155,14 @@ Compiled LWC bundle and existing formula/table/aggregate/compact-selection/input
 An obsolete pre-compact check-selection.cjs outside the repository fails by clicking a closed dropdown. The exact failure was reproduced against baseline f9cc872; assertions were not weakened or edited. The current check-compact.cjs regression remains green. No org deployment, new Apex or main update was performed.
 
 Follow-ups: general Binding resolver with typed source/target contracts; visibility/cross-field/date rules using shared expressions; live permission-aware Data executor and async provider actions; persistent org storage and activation; reproducible CI for compiled DOM tests. Current coordinator intentionally preserves legacy Summary bindings rather than exposing new binding controls.
+
+## Tabset working behavior — 2026-10-03
+
+- A new Tabset starts with Tab 1. Add Tab works on the canvas and inspector; tabs remain explicit child nodes.
+- Design shows one active tab canvas. Clicking a tab or selecting its descendant in the Tree opens that panel; controls added/dropped into the tabset target a tab rather than root.
+- Inspector exposes tab labels, Open, Move up/down, Delete tab and Default Tab. Existing component Delete, Duplicate, Undo/Redo and JSON export remain available. Duplicate translates stored default IDs.
+- Preview uses the stored default (or first available tab), respects existing Visible rules and the tab's Disabled flag, and supports Arrow Left/Right, Home/End navigation. Design can inspect disabled/hidden tabs. Empty sets show an empty state.
+- Inactive tab panels stay mounted using hidden containers, preserving table edits and selections when switching. Identity uses node IDs, independent of labels and order; deleted/moved defaults fall back gracefully.
+- Deferred: active-tab State binding, configurable tabChange actions, new condition editor and Salesforce live execution. This change does not implement those mockup controls.
+- Verification: 125/125 Node tests; LWC compilation PASS; compiled Tabset DOM checks cover creation/add/nesting, rename/reorder/default, delete/Undo, keyboard, drop target, disabled fallback, copied defaults and Design/Preview table edit preservation. Existing formula, table, aggregate, compact selector, typed-input and behavior-core DOM regressions PASS. No org deployment; org UAT pending.
+- Manual UAT: add Tabset → Add Tab → drop Datatable into Products → edit/select rows → switch away/back → set Products default → Preview → rename/reorder → delete/Undo → export/import JSON. Confirm hidden/disabled fallback with the existing Rules editor.

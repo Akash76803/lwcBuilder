@@ -1,5 +1,6 @@
 import { LightningElement, api } from 'lwc';
 import { componentDefinition, effectiveInputType, inputPattern, validateInputValue, isSelectionType } from 'c/builderModel';
+import {resolveActiveTab,tabForSelection} from 'c/builderTabModel';
 import { visible } from 'c/builderModel';
 export default class BuilderNode extends LightningElement {
  activeTab=''; collapsed=false;
@@ -16,6 +17,13 @@ export default class BuilderNode extends LightningElement {
  get expanded(){return !this.collapsed;}
  toggleSection(event){event.stopPropagation();this.collapsed=!this.collapsed;}
  get emptyContainer(){return !this.node.children.length;}
+ get designMode(){return !this.preview;}
+ get resolvedTab(){const eligible=n=>!this.preview||(visible(n,this.state||{})&&!n.props.disabled);return resolveActiveTab(this.node,!this.preview?tabForSelection(this.node,this.selectedId)||this.activeTab:this.activeTab,eligible);}
+ get tabPanels(){const active=this.resolvedTab;return this.node.children.map(node=>({id:node.id,node,hidden:node.id!==active,panelId:`${this.node.id}-panel-${node.id}`,tabId:`${this.node.id}-tab-${node.id}`}));}
+ get noAvailableTabs(){return this.isTabs&&!this.resolvedTab;}
+ addTab(event){event.stopPropagation();this.dispatchEvent(new CustomEvent('tabadd',{detail:this.node.id,bubbles:true,composed:true}));}
+ tabKey(event){const keys=['ArrowLeft','ArrowRight','Home','End'];if(!keys.includes(event.key))return;event.preventDefault();event.stopPropagation();const tabs=this.tabOptions.filter(t=>!t.disabled);let index=tabs.findIndex(t=>t.id===event.currentTarget.dataset.id);index=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;const tab=tabs[index];if(tab){this.activateTab(tab.id);this.template.querySelector(`[data-tab-id="${tab.id}"]`)?.focus();}}
+ activateTab(id){this.activeTab=id;if(!this.preview)this.dispatchEvent(new CustomEvent('nodeselect',{detail:id,bubbles:true,composed:true}));}
  get disabled(){return !!this.node.props.disabled;} get required(){return !!this.node.props.required;}
  get placeholder(){return this.node.props.placeholder||'';}
  get inputType(){const type=effectiveInputType(this.node);return type==='phone'?'tel':type==='datetime-local'?'datetime':type;}
@@ -35,9 +43,9 @@ export default class BuilderNode extends LightningElement {
  get isChoiceGroup(){return ['radioGroup','checkboxGroup'].includes(this.node.type);}
  get choiceType(){return this.node.type==='radioGroup'?'radio':'checkbox';}
  get choiceName(){return this.node.id;}
- get renderedChildren(){if(!this.preview||!this.isTabs)return this.node.children;const id=this.activeTab||this.node.children[0]?.id;return this.node.children.filter(n=>n.id===id);}
- get tabOptions(){return this.node.children.map(n=>({id:n.id,label:n.label,selected:n.id===(this.activeTab||this.node.children[0]?.id)}));}
- tabClick(event){event.stopPropagation();this.activeTab=event.currentTarget.dataset.id;}
+ get renderedChildren(){return this.node.children;}
+ get tabOptions(){const active=this.resolvedTab;return this.node.children.filter(n=>!this.preview||visible(n,this.state||{})).map(n=>({id:n.id,label:n.label,selected:n.id===active,disabled:this.preview&&!!n.props.disabled,tabIndex:n.id===active?'0':'-1',tabId:`${this.node.id}-tab-${n.id}`,panelId:`${this.node.id}-panel-${n.id}`}));}
+ tabClick(event){event.stopPropagation();this.activateTab(event.currentTarget.dataset.id);}
  choiceChange(event){if(!this.preview)return;const value=this.choiceType==='radio'?event.target.value:[...this.template.querySelectorAll('input[data-choice]:checked')].map(i=>i.value).join(',');this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value},bubbles:true,composed:true}));}
  get multiple(){return ['checkboxGroup','dualListbox'].includes(this.node.type);}
  get options(){const selected=String(this.value??'').split(',').map(v=>v.trim());return String(this.node.props.options||'').split('\n').map(v=>v.trim()).filter(Boolean).map((value,index)=>({key:String(index),value,selected:selected.includes(value)}));}
@@ -60,7 +68,7 @@ export default class BuilderNode extends LightningElement {
  get value(){return this.node.props.value;} get readonly(){return this.node.props.mode==='read';}
  get tag(){return `${this.node.type} · ${this.node.id}`;}
  select(event){event.stopPropagation();if(!this.preview)this.dispatchEvent(new CustomEvent('nodeselect',{detail:this.node.id,bubbles:true,composed:true}));}
- drop(event){event.preventDefault();event.stopPropagation();if(!this.preview)this.dispatchEvent(new CustomEvent('nodedrop',{detail:{parentId:this.node.id,type:event.dataTransfer.getData('text/plain')},bubbles:true,composed:true}));}
+ drop(event){event.preventDefault();event.stopPropagation();if(!this.preview)this.dispatchEvent(new CustomEvent('nodedrop',{detail:{parentId:this.isTabs&&event.dataTransfer.getData('text/plain')!=='tab'?(this.resolvedTab||this.node.id):this.node.id,type:event.dataTransfer.getData('text/plain')},bubbles:true,composed:true}));}
  allow(event){if(!this.preview)event.preventDefault();}
  previewChange(event){if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value:event.target.type==='checkbox'?event.target.checked:event.target.multiple?[...event.target.selectedOptions].map(o=>o.value).join(','):event.target.value},bubbles:true,composed:true}));}
  action(event){event.stopPropagation();this.dispatchEvent(new CustomEvent('demoaction',{detail:this.node.label,bubbles:true,composed:true}));}
