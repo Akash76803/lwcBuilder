@@ -15,3 +15,8 @@ Current next action: Dev Org UAT of Screen Builder foundation (categorized regis
 - Implemented: clickable header tokens, safe user formulas, stable ID references, dependent recalculation on input, boolean formula row validation and persistent definitions. Includes ROUND/IF/SUM/MIN/MAX, arithmetic/comparisons/logic; legacy table calculations preserved.
 - QA: 56 tests, 34 LWC files compile, formula and legacy table DOM interaction checks PASS. A/B pricing/GST, mixed amount/% discounts, zero base, rename, JSON, missing references and cycle cases covered locally.
 - Next: Dev Org UAT with the user's A/B table; then popup form builder. Live Salesforce data/save and cross-component execution remain pending.
+
+## Validation trigger and property panel cleanup — 2026-10-03
+Formula row rules now default to true → error (Salesforce-style). `[My stock] < [Quantity]`: stock 10 / quantity 22 fails, 22 / 10 passes, equality passes. Existing saved formulas without a trigger also use this default; for previously authored valid-when formulas select False → show error, or invert the condition. Explicit `formulaTrigger: valid` is supported and saved. Formula evaluation errors still block. Comparison/built-in rule behavior is unchanged.
+Cell holds value configuration; selected-column appearance moves to Design. Rules hides column navigation. Discount controls are confined to a collapsed optional calculator; layout and component actions are collapsed.
+Validation: 57 automated tests PASS; compiled LWC bundle and formula DOM flow PASS. Next: Dev Org UAT of trigger selection, existing saved rules and property tabs, then popup form builder.

@@ -110,3 +110,8 @@ Rules (formula kind, enabled, block): `[Total Discount %] <= 100`, `[Qty] <= [My
 - Rename a referenced header, reorder columns, export/open JSON, Undo/Redo, toggle rule enable/warn and verify persistence. Test an unknown header, cycle and divisor zero. Check token insertion cursor placement and keyboard on Salesforce.
 
 Local validation: **56 Node tests PASS**, **34 LWC files compile**, compiled DOM formula smoke PASS (add/apply, immediate recalculation, rename, cycle rejection, formula stock 50/48); legacy custom table smoke PASS. Salesforce UAT remains pending. No live query, DML or cross-component execution is added here.
+
+## Validation trigger and property panel cleanup — 2026-10-03
+Formula row rules now default to true → error (Salesforce-style). `[My stock] < [Quantity]`: stock 10 / quantity 22 fails, 22 / 10 passes, equality passes. Existing saved formulas without a trigger also use this default; for previously authored valid-when formulas select False → show error, or invert the condition. Explicit `formulaTrigger: valid` is supported and saved. Formula evaluation errors still block. Comparison/built-in rule behavior is unchanged.
+Cell holds value configuration; selected-column appearance moves to Design. Rules hides column navigation. Discount controls are confined to a collapsed optional calculator; layout and component actions are collapsed.
+Validation: 57 automated tests PASS; compiled LWC bundle and formula DOM flow PASS. Next: Dev Org UAT of trigger selection, existing saved rules and property tabs, then popup form builder.
