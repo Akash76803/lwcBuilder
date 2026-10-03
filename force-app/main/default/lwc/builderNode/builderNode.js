@@ -1,3 +1,4 @@
+import {parseStateValue,valueType} from 'c/builderBindingResolver';
 import { LightningElement, api } from 'lwc';
 import { componentDefinition, effectiveInputType, inputPattern, validateInputValue, isSelectionType } from 'c/builderModel';
 import {resolveActiveTab,tabForSelection} from 'c/builderTabModel';
@@ -34,7 +35,8 @@ export default class BuilderNode extends LightningElement {
  get inputPattern(){return !['number','date','datetime','time','toggle','checkbox'].includes(this.inputType)?inputPattern(this.node)||undefined:undefined;}
  get minLength(){return !['number','date','datetime','time','toggle','checkbox'].includes(this.inputType)?(this.node.props.minLength!==''?this.node.props.minLength:undefined):undefined;}
  get maxLength(){return !['number','date','datetime','time','toggle','checkbox'].includes(this.inputType)?(this.node.props.maxLength!==''?this.node.props.maxLength:undefined):undefined;}
- inputChange(event){const control=event.target;const value=['checkbox','toggle'].includes(this.inputType)?control.checked:control.value;const error=validateInputValue(this.node,value);control.setCustomValidity(error);if(!control.reportValidity()||error)return;if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value},bubbles:true,composed:true}));}
+ inputChange(event){const control=event.target;const value=['checkbox','toggle'].includes(this.inputType)?control.checked:control.value;let error=validateInputValue(this.node,value);if(!error&&this.node.data.valueBinding?.source==='state'){try{parseStateValue(value,valueType(this.node));}catch(e){error=e.message;}}control.setCustomValidity(error);if(!control.reportValidity()||error)return;this.commitValue(value);}
+ commitValue(value){if(this.node.data.valueBinding?.source==='state')this.dispatchEvent(new CustomEvent('valuechange',{detail:{componentId:this.node.id,preview:this.preview,value},bubbles:true,composed:true}));if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value},bubbles:true,composed:true}));}
  inputBlur(event){this.inputChange(event);}
  get checked(){return this.value===true||this.value==='true';}
  get isTextarea(){return ['textarea','richText'].includes(this.node.type);}
@@ -46,7 +48,7 @@ export default class BuilderNode extends LightningElement {
  get renderedChildren(){return this.node.children;}
  get tabOptions(){const active=this.resolvedTab;return this.node.children.filter(n=>!this.preview||visible(n,this.state||{})).map(n=>({id:n.id,label:n.label,selected:n.id===active,disabled:this.preview&&!!n.props.disabled,tabIndex:n.id===active?'0':'-1',tabId:`${this.node.id}-tab-${n.id}`,panelId:`${this.node.id}-panel-${n.id}`}));}
  tabClick(event){event.stopPropagation();this.activateTab(event.currentTarget.dataset.id);}
- choiceChange(event){if(!this.preview)return;const value=this.choiceType==='radio'?event.target.value:[...this.template.querySelectorAll('input[data-choice]:checked')].map(i=>i.value).join(',');this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value},bubbles:true,composed:true}));}
+ choiceChange(event){if(!this.preview&&this.node.data.valueBinding?.source!=='state')return;const value=this.choiceType==='radio'?event.target.value:[...this.template.querySelectorAll('input[data-choice]:checked')].map(i=>i.value).join(',');this.commitValue(value);}
  get multiple(){return ['checkboxGroup','dualListbox'].includes(this.node.type);}
  get options(){const selected=String(this.value??'').split(',').map(v=>v.trim());return String(this.node.props.options||'').split('\n').map(v=>v.trim()).filter(Boolean).map((value,index)=>({key:String(index),value,selected:selected.includes(value)}));}
  get isMenu(){return this.node.type==='buttonMenu';}
@@ -54,9 +56,9 @@ export default class BuilderNode extends LightningElement {
  get iconName(){return this.node.props.iconName||'utility:info';}
  get isIcon(){return this.node.type==='icon';}
  get isSelection(){return isSelectionType(this.node.type);}
- adapterEvent(event){const contract=componentDefinition(this.node.type)?.adapter;if(!contract?.eventsOut.includes(event.type))return;const payload=event.detail;this.dispatchEvent(new CustomEvent('adapterevent',{detail:{componentId:this.node.id,preview:this.preview,eventName:event.type,payload},bubbles:true,composed:true}));if(this.preview){const detail={key:this.node.label,value:payload[contract.previewValue],componentId:this.node.id};if(contract.previewRecords)detail.selectedRecords=payload[contract.previewRecords];else Object.assign(detail,payload);this.dispatchEvent(new CustomEvent('previewchange',{detail,bubbles:true,composed:true}));}}
+ adapterEvent(event){const contract=componentDefinition(this.node.type)?.adapter;if(!contract?.eventsOut.includes(event.type))return;const payload=event.detail;if(this.isSelection&&payload.valid)this.commitValue(payload.value);this.dispatchEvent(new CustomEvent('adapterevent',{detail:{componentId:this.node.id,preview:this.preview,eventName:event.type,payload},bubbles:true,composed:true}));if(this.preview){const detail={key:this.node.label,value:payload[contract.previewValue],componentId:this.node.id};if(contract.previewRecords)detail.selectedRecords=payload[contract.previewRecords];else Object.assign(detail,payload);this.dispatchEvent(new CustomEvent('previewchange',{detail,bubbles:true,composed:true}));}}
  get isOutput(){return ['outputField','helptext','badge','pill','spinner','fileUpload'].includes(this.node.type);}
- get outputCaption(){return ({spinner:'Loading indicator',fileUpload:'Salesforce file upload · visual configuration',lookup:'Record search · visual configuration',outputField:this.value,helptext:this.value,pill:'Removable selection',badge:''})[this.node.type];}
+ get outputCaption(){if(['outputField','helptext','badge','pill'].includes(this.node.type)&&(this.node.type!=='pill'||this.node.data.valueBinding||this.node.data.packBinding?.packId||this.value))return this.value;return ({spinner:'Loading indicator',fileUpload:'Salesforce file upload · visual configuration',lookup:'Record search · visual configuration',outputField:this.value,helptext:this.value,pill:'Removable selection',badge:''})[this.node.type];}
  get buttonClass(){return this.node.props.variant==='brand'?'primary':'';}
  get hasPackBinding(){return !!this.node.data.packBinding?.packId;} get bindingError(){return this.node.data.boundError;} get hasBoundTable(){return this.isTable&&this.hasPackBinding&&!this.bindingError;} get boundJson(){return JSON.stringify(this.node.data.boundSample,null,2);}
  get boundColumns(){const rows=Array.isArray(this.node.data.boundSample)?this.node.data.boundSample:[];return [...new Set(rows.flatMap(r=>Object.keys(r||{})))].map(key=>({key,label:key}));}
@@ -70,6 +72,6 @@ export default class BuilderNode extends LightningElement {
  select(event){event.stopPropagation();if(!this.preview)this.dispatchEvent(new CustomEvent('nodeselect',{detail:this.node.id,bubbles:true,composed:true}));}
  drop(event){event.preventDefault();event.stopPropagation();if(!this.preview)this.dispatchEvent(new CustomEvent('nodedrop',{detail:{parentId:this.isTabs&&event.dataTransfer.getData('text/plain')!=='tab'?(this.resolvedTab||this.node.id):this.node.id,type:event.dataTransfer.getData('text/plain')},bubbles:true,composed:true}));}
  allow(event){if(!this.preview)event.preventDefault();}
- previewChange(event){if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value:event.target.type==='checkbox'?event.target.checked:event.target.multiple?[...event.target.selectedOptions].map(o=>o.value).join(','):event.target.value},bubbles:true,composed:true}));}
+ previewChange(event){if(this.node.data.valueBinding?.source==='state'&&event.target.setCustomValidity){const value=event.target.value,error=validateInputValue(this.node,value);event.target.setCustomValidity(error);if(error||!event.target.reportValidity())return;}if(this.preview||this.node.data.valueBinding?.source==='state')this.commitValue(event.target.type==='checkbox'?event.target.checked:event.target.multiple?[...event.target.selectedOptions].map(o=>o.value).join(','):event.target.value);}
  action(event){event.stopPropagation();this.dispatchEvent(new CustomEvent('demoaction',{detail:this.node.label,bubbles:true,composed:true}));}
 }
