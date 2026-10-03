@@ -46,7 +46,7 @@ export default class BuilderNode extends LightningElement {
  get iconName(){return this.node.props.iconName||'utility:info';}
  get isIcon(){return this.node.type==='icon';}
  get isSelection(){return isSelectionType(this.node.type);}
- tableChange(event){if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value:event.detail.rows,componentId:this.node.id,...event.detail},bubbles:true,composed:true}));}
+ tableChange(event){this.dispatchEvent(new CustomEvent('tableoutput',{detail:{componentId:this.node.id,preview:this.preview,...event.detail},bubbles:true,composed:true}));if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value:event.detail.rows,componentId:this.node.id,...event.detail},bubbles:true,composed:true}));}
  selectionChange(event){if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value:event.detail.value,componentId:this.node.id,selectedRecords:event.detail.records},bubbles:true,composed:true}));}
  get isOutput(){return ['outputField','helptext','badge','pill','spinner','fileUpload'].includes(this.node.type);}
  get outputCaption(){return ({spinner:'Loading indicator',fileUpload:'Salesforce file upload · visual configuration',lookup:'Record search · visual configuration',outputField:this.value,helptext:this.value,pill:'Removable selection',badge:''})[this.node.type];}
@@ -55,7 +55,7 @@ export default class BuilderNode extends LightningElement {
  get boundColumns(){const rows=Array.isArray(this.node.data.boundSample)?this.node.data.boundSample:[];return [...new Set(rows.flatMap(r=>Object.keys(r||{})))].map(key=>({key,label:key}));}
  get noBoundRows(){return !this.boundRows.length;}
  get boundRows(){const rows=Array.isArray(this.node.data.boundSample)?this.node.data.boundSample:[];return rows.map((r,index)=>({key:String(index),cells:this.boundColumns.map(c=>({key:c.key,value:typeof r[c.key]==='object'?JSON.stringify(r[c.key]):String(r[c.key]??'')}))}));}
- get isTable(){return this.node.type==='table';} get isButton(){return this.node.type==='button';} get isSearch(){return false;}
+ get isSummary(){return this.node.type==='summaryTable';}get isTable(){return this.node.type==='table';} get isButton(){return this.node.type==='button';} get isSearch(){return false;}
  get isChild(){return this.node.type==='child';} get isCombo(){return this.node.type==='combobox';}
  get isInput(){return this.node.type==='inputField';} get label(){return this.node.label;}
  get value(){return this.node.props.value;} get readonly(){return this.node.props.mode==='read';}
