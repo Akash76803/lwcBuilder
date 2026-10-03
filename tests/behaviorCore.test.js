@@ -41,6 +41,9 @@ test('router when filters, unsubscribe, origin propagation and automatic nested 
  const off=router.register('node','change',e=>seen.push(e),parseExpression('[A] > 2',refs));router.dispatch('node','change',{});assert.equal(seen.length,0);s.write('a',4);router.dispatch('node','change',{});assert.equal(seen.length,1);off();
  router.register('a','go',e=>{seen.push(e);router.dispatch('b','go',{});});router.register('b','go',e=>{seen.push(e);router.dispatch('a','go',{});});assert.throws(()=>router.dispatch('a','go',{}),/depth/);assert.deepEqual(seen.at(-1).origin,seen.at(-2).origin);assert.equal(seen.at(-1).depth,2);assert.equal(router.dispatch('unused','go',{}).envelope.depth,0);
 });
+test('router nested callers cannot override active origin or reset the loop depth',()=>{
+ const router=createEventRouter({maxDepth:2});router.register('a','loop',()=>router.dispatch('a','loop',{}, {origin:'fake',depth:0}));assert.throws(()=>router.dispatch('a','loop',{}),/depth/);assert.throws(()=>router.dispatch('a','loop',{}, {depth:-1}),/context/);
+});
 test('executor core collection actions deduplicate and preserve position; stop and continue report failures',()=>{
  const s=createStateStore([{key:'items',type:'List',defaultValue:[]},{key:'n',type:'Number',defaultValue:0}]),executor=createActionExecutor(s);
  let result=executor.execute([{type:'collectionUpsert',key:'items',entries:[{rowId:'a',value:1},{rowId:'b',value:2}]},{type:'collectionUpsert',key:'items',entries:[{rowId:'a',value:3}]},{type:'collectionRemove',key:'items',entries:[{rowId:'b'}]}]);assert.ok(result.every(r=>r.ok));assert.deepEqual(s.read('items'),[{rowId:'a',value:3}]);
