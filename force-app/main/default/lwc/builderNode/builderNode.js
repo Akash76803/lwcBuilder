@@ -36,7 +36,7 @@ export default class BuilderNode extends LightningElement {
  get minLength(){return !['number','date','datetime','time','toggle','checkbox'].includes(this.inputType)?(this.node.props.minLength!==''?this.node.props.minLength:undefined):undefined;}
  get maxLength(){return !['number','date','datetime','time','toggle','checkbox'].includes(this.inputType)?(this.node.props.maxLength!==''?this.node.props.maxLength:undefined):undefined;}
  inputChange(event){const control=event.target;const value=['checkbox','toggle'].includes(this.inputType)?control.checked:control.value;let error=validateInputValue(this.node,value);if(!error&&this.node.data.valueBinding?.source==='state'){try{parseStateValue(value,valueType(this.node));}catch(e){error=e.message;}}control.setCustomValidity(error);if(!control.reportValidity()||error)return;this.commitValue(value);}
- commitValue(value){if(this.node.data.valueBinding?.source==='state')this.dispatchEvent(new CustomEvent('valuechange',{detail:{componentId:this.node.id,preview:this.preview,value},bubbles:true,composed:true}));if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,value},bubbles:true,composed:true}));}
+ commitValue(value){if(this.node.data.valueBinding?.source==='state')this.dispatchEvent(new CustomEvent('valuechange',{detail:{componentId:this.node.id,preview:this.preview,value},bubbles:true,composed:true}));if(this.preview)this.dispatchEvent(new CustomEvent('previewchange',{detail:{key:this.node.label,componentId:this.node.id,value},bubbles:true,composed:true}));}
  inputBlur(event){this.inputChange(event);}
  get checked(){return this.value===true||this.value==='true';}
  get isTextarea(){return ['textarea','richText'].includes(this.node.type);}

@@ -2,7 +2,7 @@ const {JSDOM}=require('jsdom'),fs=require('fs'),assert=require('assert/strict');
 const dom=new JSDOM('<body></body>',{runScripts:'dangerously',pretendToBeVisual:true,url:'https://example.test'}),w=dom.window;
 w.eval(fs.readFileSync(process.env.LWC_BUILDER_DOM_BUNDLE||__dirname+'/bundle.js','utf8'));const app=w.mount(),tick=()=>new Promise(r=>setTimeout(r,20));
 const deep=(root,s)=>{let a=[...root.querySelectorAll(s)];for(const e of root.querySelectorAll('*'))if(e.shadowRoot)a.push(...deep(e.shadowRoot,s));return a;};
-(async()=>{await tick();const sr=app.shadowRoot;let exported;w.Blob=class{constructor(parts){exported=JSON.parse(parts.join(''));}};w.URL.createObjectURL=()=> 'blob:test';w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=()=>{};
+(async()=>{await tick();const sr=app.shadowRoot;const advanced=sr.querySelector('.main-nav input[type=checkbox]');advanced.checked=true;advanced.dispatchEvent(new w.Event('change'));await tick();let exported;w.Blob=class{constructor(parts){exported=JSON.parse(parts.join(''));}};w.URL.createObjectURL=()=> 'blob:test';w.URL.revokeObjectURL=()=>{};w.HTMLAnchorElement.prototype.click=()=>{};
 async function click(e){assert.ok(e,'Missing control');e.click();await tick();}async function change(e,value,type='change'){assert.ok(e);if(e.type==='checkbox')e.checked=value;else e.value=value;e.dispatchEvent(new w.Event(type,{bubbles:true}));await tick();}
 async function exp(){await click([...sr.querySelectorAll('button')].find(b=>b.textContent==='Export JSON'));return exported;}
 const editor=()=>sr.querySelector('c-builder-binding-editor').shadowRoot;

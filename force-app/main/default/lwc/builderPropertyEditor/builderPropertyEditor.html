@@ -1,6 +1,6 @@
-<template><template for:each={properties} for:item="property"><label key={property.key}>{property.label}
+<template><template for:each={groups} for:item="group"><details key={group.name} open={group.open}><summary>{group.name}</summary><template for:each={group.properties} for:item="property"><label key={property.key}>{property.label}
 <template lwc:if={property.isInput}><input type={property.type} value={property.value} min={property.min} max={property.max} data-key={property.key} onchange={change}/></template>
 <template lwc:if={property.isCheckbox}><input type="checkbox" checked={property.value} data-key={property.key} onchange={change}/></template>
 <template lwc:if={property.isTextarea}><textarea data-key={property.key} onchange={change}>{property.value}</textarea></template>
 <template lwc:if={property.isSelect}><select data-key={property.key} onchange={change}><template for:each={property.options} for:item="option"><option key={option.value} value={option.value} selected={option.selected}>{option.value}</option></template></select></template>
-</label></template></template>
+</label></template></details></template></template>
